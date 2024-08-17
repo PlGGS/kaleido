@@ -26,6 +26,9 @@ public class SpawnWalls : MonoBehaviour
 
     private List<Coroutine> runningCoroutines = new List<Coroutine>();
 
+    public const float defaultWallMoveSpeed = 30f;
+    public const float defaultWallMoveDuration = 0.5f;
+
     void Start()
     {
         prevRadius = currRadius;
@@ -41,7 +44,7 @@ public class SpawnWalls : MonoBehaviour
         {
             StopAllCoroutines();
 
-            vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern(), 1f); //TODO figure out what to make this value
+            vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern());
             
             prevRadius = currRadius;
             prevAmtWalls = currAmtWalls;
@@ -118,7 +121,7 @@ public class SpawnWalls : MonoBehaviour
     /// Moves walls to new positions based on the currently defined pattern
     /// </summary>
     /// <returns>New vertex pattern</returns>
-    List<Vector3> TranslateWallsToNewPositions(List<Vector3> vertexPattern, float moveSpeed)
+    List<Vector3> TranslateWallsToNewPositions/*TODO AtSpeed / OverDuration*/(List<Vector3> vertexPattern, float moveSpeed = defaultWallMoveSpeed, float moveDuration = defaultWallMoveDuration)
     {
         int i = 0;
         for (; i < vertexPattern.Count; i++)
@@ -139,7 +142,7 @@ public class SpawnWalls : MonoBehaviour
 
             if (currWall != null)
             {
-                Coroutine wallCoroutine = StartCoroutine(MoveAndRotateWall(currWall, currVertex, nextVertex, moveSpeed));
+                Coroutine wallCoroutine = StartCoroutine(TranslateWallOverDuration(currWall, currVertex, nextVertex, moveDuration));
                 runningCoroutines.Add(wallCoroutine);
             }
         }
@@ -161,25 +164,111 @@ public class SpawnWalls : MonoBehaviour
         return vertexPattern;
     }
 
-    private IEnumerator MoveAndRotateWall(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed)
+    private IEnumerator TranslateWallAtSpeed(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed = defaultWallMoveSpeed)
     {
         // Wait until the next frame to ensure Start has been called
         yield return null;
 
         // Get the ElongateBottom script from the wall
-        ElongateBottom elongation = currWall.GetComponent<ElongateBottom>();
+        WallController wallController = currWall.GetComponent<WallController>();
 
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
-        if (elongation == null) yield break;
+        if (wallController == null) yield break;
 
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, wallController, currVertex, nextVertex);
+
+        //Use the wall's moveSpeed if we don't define one ourselves
+        if (wallController.moveSpeed == defaultWallMoveSpeed)
+            moveSpeed = wallController.moveSpeed;
+
+        float distance = Vector3.Distance(startPosition, targetPosition);
+        float remainingDistance = distance;
+        while (remainingDistance > 0)
+        {
+            //Check again if the attached script is missing (meaning the wall was destroyed)
+            if (wallController == null) yield break;
+
+            // Lerp position over time
+            currWall.transform.position = Vector3.Lerp(startPosition, targetPosition, 1 - (remainingDistance / distance));
+
+            // Slerp rotation over time
+            currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, 1 - (remainingDistance / distance));
+
+            // Lerp scale over time
+            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
+
+            remainingDistance -= Time.deltaTime * moveSpeed;
+
+            yield return null;
+        }
+
+        //Check again if the attached script is missing (meaning the wall was destroyed)
+        if (wallController == null) yield break;
+
+        // Final adjustments to ensure accuracy
+        currWall.transform.position = targetPosition;
+        currWall.transform.rotation = targetRotation;
+        currWall.transform.localScale = targetScale;
+    }
+
+    private IEnumerator TranslateWallOverDuration(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveDuration = defaultWallMoveDuration)
+    {
+        // Wait until the next frame to ensure Start has been called
+        yield return null;
+
+        // Get the ElongateBottom script from the wall
+        WallController wallController = currWall.GetComponent<WallController>();
+
+        //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
+        if (wallController == null) yield break;
+
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, wallController, currVertex, nextVertex);
+
+        //Use the wall's moveSpeed if we don't define one ourselves
+        //if (wallController.moveSpeed == defaultWallMoveSpeed)
+        //    moveSpeed = wallController.moveSpeed;
+
+        float elapsedTime = 0f;
+        while (elapsedTime < 1f)
+        {
+            //Check again if the attached script is missing (meaning the wall was destroyed)
+            if (wallController == null) yield break;
+
+            // Lerp position over time
+            currWall.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime);
+
+            // Slerp rotation over time
+            currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
+
+            // Lerp scale over time
+            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
+
+            //Debug.Log($"Moving wall: {currWall.name}, Elapsed seconds: {elapsedTime * moveDuration}");
+
+            elapsedTime += Time.deltaTime * (1 / moveDuration);
+
+            yield return null;
+        }
+
+        //Check again if the attached script is missing (meaning the wall was destroyed)
+        if (wallController == null) yield break;
+
+        // Final adjustments to ensure accuracy
+        currWall.transform.position = targetPosition;
+        currWall.transform.rotation = targetRotation;
+        currWall.transform.localScale = targetScale;
+    }
+
+    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject currWall, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
+    {
         // Calculate the new Y scale based on the elongation factor
-        float newYScale = elongation.originalScale.y * elongation.currElongationFactor;
+        float newYScale = wallController.originalScale.y * wallController.currElongationFactor;
 
         // Calculate the offset to keep the top of the cube stationary
-        float yOffset = (newYScale - elongation.originalScale.y);
+        float yOffset = (newYScale - wallController.originalScale.y);
 
-        Vector3 currWallPosition = currWall.transform.position;
-        Vector3 nextWallPosition = (new Vector3(currVertex.x, elongation.originalPosition.y, currVertex.z) + new Vector3(nextVertex.x, elongation.originalPosition.y - yOffset, nextVertex.z)) / 2f;
+        Vector3 startPosition = currWall.transform.position;
+        Vector3 targetPosition = (new Vector3(currVertex.x, wallController.originalPosition.y, currVertex.z) + new Vector3(nextVertex.x, wallController.originalPosition.y - yOffset, nextVertex.z)) / 2f;
 
         Quaternion startRotation = currWall.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(nextVertex - currVertex);
@@ -188,36 +277,7 @@ public class SpawnWalls : MonoBehaviour
         float newWallLength = Vector3.Distance(currVertex, nextVertex);
         Vector3 targetScale = new Vector3(startScale.x, newYScale, newWallLength);
 
-        float elapsedTime = 0f;
-
-        while (elapsedTime < 1f)
-        {
-            //Check again if the attached script is missing (meaning the wall was destroyed)
-            if (elongation == null) yield break;
-
-            // Lerp position over time
-            currWall.transform.position = Vector3.Lerp(currWallPosition, nextWallPosition, elapsedTime * moveSpeed);
-
-            // Slerp rotation over time
-            currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime * moveSpeed);
-
-            // Lerp scale over time
-            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime * moveSpeed);
-
-            Debug.Log($"Moving wall: {currWall.name}, ElapsedTime: {elapsedTime}");
-
-            elapsedTime += Time.deltaTime;
-
-            yield return null;
-        }
-
-        //Check again if the attached script is missing (meaning the wall was destroyed)
-        if (elongation == null) yield break;
-
-        // Final adjustments to ensure accuracy
-        //currWall.transform.position = nextWallPosition;
-        //currWall.transform.rotation = targetRotation;
-        //currWall.transform.localScale = targetScale;
+        return (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale); 
     }
 
     void StopAllCoroutines()

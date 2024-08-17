@@ -2,13 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ElongateBottom : MonoBehaviour
+public class WallController : MonoBehaviour
 {
     public Vector3 originalScale;
     public Vector3 originalPosition;
 
+    public float currElongationFactor = 1f;
     private float prevElongationFactor;
-    public float currElongationFactor = 1.0f;
+
+    public float moveSpeed = 1f;
 
     void Start()
     {

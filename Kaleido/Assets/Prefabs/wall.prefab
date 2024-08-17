@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5834970137289508088}
   - component: {fileID: 8967528856360257667}
   - component: {fileID: 242820513672478703}
-  - component: {fileID: 1821964947176015821}
+  - component: {fileID: 1644151359152189876}
   m_Layer: 0
   m_Name: wall
   m_TagString: Untagged
@@ -106,7 +106,7 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &1821964947176015821
+--- !u!114 &1644151359152189876
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -118,4 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ea652d08f518764eb474dbc662235c0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  originalScale: {x: 0, y: 0, z: 0}
+  originalPosition: {x: 0, y: 0, z: 0}
   currElongationFactor: 100
+  moveSpeed: 1
