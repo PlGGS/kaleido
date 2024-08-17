@@ -461,9 +461,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallPrefab: {fileID: 1710287575324640997, guid: 30da2ab185b603345a4d684b41a10eee,
     type: 3}
-  numberOfWalls: 10
-  radius: 15
   walls: []
+  initialAmtWalls: 10
+  prevAmtWalls: 0
+  currRadius: 10
+  prevRadius: 0
+  currPatternDefinition: 1
+  prevPatternDefinition: 0
+  vertices: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

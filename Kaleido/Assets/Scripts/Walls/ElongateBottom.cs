@@ -22,9 +22,9 @@ public class ElongateBottom : MonoBehaviour
         if (currElongationFactor != prevElongationFactor)
         {
             Elongate();
-        }
 
-        prevElongationFactor = currElongationFactor;
+            prevElongationFactor = currElongationFactor;
+        }
     }
 
     void Elongate()

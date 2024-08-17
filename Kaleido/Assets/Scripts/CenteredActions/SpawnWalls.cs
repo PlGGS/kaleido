@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,8 +6,36 @@ using UnityEngine;
 public class SpawnWalls : MonoBehaviour
 {
     public GameObject wallPrefab;
-    public int numberOfWalls;
-    public float radius;
+
+    [HideInInspector]
+    public List<GameObject> walls;
+
+    public int initialAmtWalls;
+    public int currAmtWalls
+    {
+        get
+        {
+            if (walls != null && walls.Count > 2)
+                return walls.Count;
+
+            return initialAmtWalls;
+        }
+        set
+        {
+            currAmtWalls = value;
+        }
+    }
+    [HideInInspector]
+    public int prevAmtWalls;
+
+    public float currRadius;
+    [HideInInspector]
+    public float prevRadius;
+
+    public VertexPattern.Patterns currPatternDefinition;
+    [HideInInspector]
+    public VertexPattern.Patterns prevPatternDefinition;
+    
 
     //public List<Vector3> walls = new List<GameObject>();
     public List<Vector3> vertices;
@@ -15,66 +44,101 @@ public class SpawnWalls : MonoBehaviour
 
     void Start()
     {
-        vertices = DefineInfinityPattern(numberOfWalls, radius);
-        
-        SpawnWallsAtPositions();
+        vertices = SpawnWallsAtPositions(MapToCurrentVertexPattern());
+
+
+
     }
 
-    void SpawnWallsAtPositions()
+    void Update()
     {
-        for (int i = 0; i < vertices.Count; i++)
+        if (currRadius != prevRadius || currAmtWalls != prevAmtWalls || currPatternDefinition != prevPatternDefinition)
         {
-            Vector3 vertex = vertices[i];
-            Vector3 nextVertex = vertices[(i + 1) % vertices.Count]; // Wrap around to the first point// Calculate the position and rotation for the wall
-            Vector3 wallPosition = (vertex + nextVertex) / 2f;
-            Quaternion wallRotation = Quaternion.LookRotation(nextVertex - vertex);
+            vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern(), 1000f, 1000f);
+            
+            prevRadius = currRadius;
+            prevAmtWalls = currAmtWalls;
+            prevPatternDefinition = currPatternDefinition;
+        }
+
+        if (walls.Count != currAmtWalls)
+        {
+            currAmtWalls = walls.Count;
+        }
+    }
+
+    List<Vector3> MapToCurrentVertexPattern()
+    {
+        List<Vector3> vertices;
+
+        switch (currPatternDefinition)
+        {
+            case VertexPattern.Patterns.Circle:
+                currPatternDefinition = VertexPattern.Patterns.Circle;
+                vertices = VertexPattern.Circle(currAmtWalls, currRadius);
+                break;
+            case VertexPattern.Patterns.Infinity:
+                currPatternDefinition = VertexPattern.Patterns.Infinity;
+                vertices = VertexPattern.Infinity(currAmtWalls, currRadius);
+                break;
+            default:
+                throw new Exception("Invalid Vertex Pattern Definition");
+        }
+
+        return vertices;
+    }
+
+    List<Vector3> SpawnWallsAtPositions(List<Vector3> vertexPattern)
+    {
+        for (int i = 0; i < vertexPattern.Count; i++)
+        {
+            Vector3 currVertex = vertexPattern[i];
+            Vector3 nextVertex = vertexPattern[(i + 1) % vertexPattern.Count]; // Wrap around to the first point
+            Vector3 wallPosition = (currVertex + nextVertex) / 2f;
+            Quaternion wallRotation = Quaternion.LookRotation(nextVertex - currVertex);
 
             // Calculate the length of the wall
-            float wallLength = Vector3.Distance(vertex, nextVertex);
-            //float padding = wallLength * wallWidthPaddingPercentage;
+            float wallLength = Vector3.Distance(currVertex, nextVertex);
+            //float padding = wallLength * wallWidthPadding;
 
             // Instantiate the wall prefab
             GameObject wall = Instantiate(wallPrefab, wallPosition, wallRotation);
             wall.transform.localScale = new Vector3(wall.transform.localScale.x, wall.transform.localScale.y, wallLength);
+
+            // Add wall to list of walls
+            walls.Add(wall);
         }
+
+        return vertexPattern;
     }
 
-    List<Vector3> DefineCircularPattern(int amtVertices, float radius)
+    /// <summary>
+    /// Moves walls to new positions based on the currently defined pattern
+    /// </summary>
+    /// <returns>New vertex pattern</returns>
+    List<Vector3> TranslateWallsToNewPositions(List<Vector3> vertexPattern, float moveSpeed, float rotationSpeed)
     {
-        List<Vector3> vertices = new List<Vector3>();
-
-        float angleStep = 360.0f / amtVertices;
-        float angleStepRadians = angleStep * Mathf.Deg2Rad;
-
-        for (int i = 0; i < amtVertices; i++)
+        for (int i = 0; i < vertices.Count; i++)
         {
-            Vector3 position = new Vector3(
-                transform.position.x + Mathf.Cos(i * angleStepRadians) * radius,
-                0,
-                transform.position.z + Mathf.Sin(i * angleStepRadians) * radius
-            );
-            vertices.Add(position);
+            Vector3 currVertex = vertexPattern[i];
+            Vector3 nextVertex = vertexPattern[(i + 1) % vertexPattern.Count]; // Wrap around to the first point
+            GameObject currWall = walls[i];
+
+            if (currWall != null)
+            {
+                Vector3 currWallPosition = currWall.transform.position;
+                Vector3 nextWallPosition = (new Vector3(currVertex.x, currWallPosition.y, currVertex.z) + new Vector3(nextVertex.x, currWallPosition.y, nextVertex.z)) / 2f;
+
+                currWall.transform.position = Vector3.Lerp(currWallPosition, nextWallPosition, Time.deltaTime * moveSpeed);
+
+                Quaternion wallRotation = Quaternion.LookRotation(nextVertex - currVertex);
+                currWall.transform.rotation = Quaternion.Slerp(currWall.transform.rotation, wallRotation, Time.deltaTime * rotationSpeed);
+
+                float newWallLength = Vector3.Distance(currVertex, vertexPattern[(i + 1) % vertexPattern.Count]);
+                currWall.transform.localScale = new Vector3(currWall.transform.localScale.x, currWall.transform.localScale.y, newWallLength);
+            }
         }
 
-        return vertices;
-    }
-
-    List<Vector3> DefineInfinityPattern(int amtVertices, float radius)
-    {
-        List<Vector3> vertices = new List<Vector3>();
-
-        float angleStep = 2 * Mathf.PI / amtVertices;
-
-        for (int i = 0; i < amtVertices; i++)
-        {
-            float t = i * angleStep;
-            float x = (Mathf.Sin(t) * radius) / (1 + Mathf.Pow(Mathf.Cos(t), 2));
-            float z = (Mathf.Sin(t) * Mathf.Cos(t) * radius * 1.5f) / (1 + Mathf.Pow(Mathf.Cos(t), 2));
-
-            Vector3 position = new Vector3(x, 0, z);
-            vertices.Add(position);
-        }
-
-        return vertices;
+        return vertexPattern;
     }
 }
