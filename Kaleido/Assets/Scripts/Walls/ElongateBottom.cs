@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class ElongateBottom : MonoBehaviour
 {
-    Vector3 originalScale;
-    Vector3 originalPosition;
+    public Vector3 originalScale;
+    public Vector3 originalPosition;
 
     private float prevElongationFactor;
     public float currElongationFactor = 1.0f;
@@ -15,6 +15,9 @@ public class ElongateBottom : MonoBehaviour
         // Get the original scale of the cube
         originalScale = transform.localScale;
         originalPosition = transform.position;
+
+        //Set these to the same value initial since we update this in the SpawnWalls.MoveAndRotateWall coroutine
+        //prevElongationFactor = currElongationFactor;
     }
 
     void Update()
