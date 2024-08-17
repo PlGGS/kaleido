@@ -462,7 +462,7 @@ MonoBehaviour:
   wallPrefab: {fileID: 1710287575324640997, guid: 30da2ab185b603345a4d684b41a10eee,
     type: 3}
   walls: []
-  initialAmtWalls: 10
+  currAmtWalls: 24
   prevAmtWalls: 0
   currRadius: 10
   prevRadius: 0

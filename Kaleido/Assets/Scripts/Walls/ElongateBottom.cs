@@ -35,8 +35,6 @@ public class ElongateBottom : MonoBehaviour
         // Calculate the offset to keep the top of the cube stationary
         float yOffset = (newYScale - originalScale.y) / 2.0f;
 
-        Debug.Log($"Scale: { originalScale.x }, {currElongationFactor}, { originalScale.z }");
-        
         // Apply the new scale
         transform.localScale = new Vector3(originalScale.x, newYScale, originalScale.z);
 

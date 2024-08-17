@@ -10,8 +10,8 @@ public class SpawnWalls : MonoBehaviour
     [HideInInspector]
     public List<GameObject> walls;
 
-    public int initialAmtWalls;
-    public int currAmtWalls
+    public int currAmtWalls;
+    /*
     {
         get
         {
@@ -25,6 +25,7 @@ public class SpawnWalls : MonoBehaviour
             currAmtWalls = value;
         }
     }
+    */
     [HideInInspector]
     public int prevAmtWalls;
 
@@ -69,23 +70,23 @@ public class SpawnWalls : MonoBehaviour
 
     List<Vector3> MapToCurrentVertexPattern()
     {
-        List<Vector3> vertices;
+        List<Vector3> newVertices;
 
         switch (currPatternDefinition)
         {
             case VertexPattern.Patterns.Circle:
                 currPatternDefinition = VertexPattern.Patterns.Circle;
-                vertices = VertexPattern.Circle(currAmtWalls, currRadius);
+                newVertices = VertexPattern.Circle(currAmtWalls, currRadius);
                 break;
             case VertexPattern.Patterns.Infinity:
                 currPatternDefinition = VertexPattern.Patterns.Infinity;
-                vertices = VertexPattern.Infinity(currAmtWalls, currRadius);
+                newVertices = VertexPattern.Infinity(currAmtWalls, currRadius);
                 break;
             default:
                 throw new Exception("Invalid Vertex Pattern Definition");
         }
 
-        return vertices;
+        return newVertices;
     }
 
     List<Vector3> SpawnWallsAtPositions(List<Vector3> vertexPattern)
@@ -118,10 +119,23 @@ public class SpawnWalls : MonoBehaviour
     /// <returns>New vertex pattern</returns>
     List<Vector3> TranslateWallsToNewPositions(List<Vector3> vertexPattern, float moveSpeed, float rotationSpeed)
     {
-        for (int i = 0; i < vertices.Count; i++)
+        int i = 0;
+        for (; i < vertexPattern.Count; i++)
         {
             Vector3 currVertex = vertexPattern[i];
             Vector3 nextVertex = vertexPattern[(i + 1) % vertexPattern.Count]; // Wrap around to the first point
+            
+            //In case we're dynamically adding wall(s)
+            if (i == walls.Count)
+            {
+                Vector3 wallPosition = (currVertex + nextVertex) / 2f;
+                Quaternion wallRotation = Quaternion.LookRotation(nextVertex - currVertex);
+
+                Debug.Log("Ay I'm instantiating a new wall here");
+
+                walls.Add(Instantiate(wallPrefab, wallPosition, wallRotation));
+            }
+
             GameObject currWall = walls[i];
 
             if (currWall != null)
@@ -136,6 +150,20 @@ public class SpawnWalls : MonoBehaviour
 
                 float newWallLength = Vector3.Distance(currVertex, vertexPattern[(i + 1) % vertexPattern.Count]);
                 currWall.transform.localScale = new Vector3(currWall.transform.localScale.x, currWall.transform.localScale.y, newWallLength);
+            }
+        }
+
+        //In case we're dynamically removing walls, delete the extra ones
+        if (walls.Count > vertexPattern.Count)
+        {
+            //Debug.Log($"Walls: {walls.Count}, Verts: {vertices.Count}");
+            
+            for (int o = walls.Count - 1; o >= i; o--)
+            {
+                //Debug.Log("Ay I'm destroying walls here");
+
+                Destroy(walls[i]);
+                walls.RemoveAt(i);
             }
         }
 
