@@ -11,21 +11,6 @@ public class SpawnWalls : MonoBehaviour
     public List<GameObject> walls;
 
     public int currAmtWalls;
-    /*
-    {
-        get
-        {
-            if (walls != null && walls.Count > 2)
-                return walls.Count;
-
-            return initialAmtWalls;
-        }
-        set
-        {
-            currAmtWalls = value;
-        }
-    }
-    */
     [HideInInspector]
     public int prevAmtWalls;
 
@@ -36,26 +21,23 @@ public class SpawnWalls : MonoBehaviour
     public VertexPattern.Patterns currPatternDefinition;
     [HideInInspector]
     public VertexPattern.Patterns prevPatternDefinition;
-    
 
-    //public List<Vector3> walls = new List<GameObject>();
     public List<Vector3> vertices;
-
-    private float wallWidthPadding = 0.579f;
-
+    
     void Start()
     {
+        prevRadius = currRadius;
+        prevAmtWalls = currAmtWalls;
+        prevPatternDefinition = currPatternDefinition;
+
         vertices = SpawnWallsAtPositions(MapToCurrentVertexPattern());
-
-
-
     }
 
     void Update()
     {
         if (currRadius != prevRadius || currAmtWalls != prevAmtWalls || currPatternDefinition != prevPatternDefinition)
         {
-            vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern(), 1000f, 1000f);
+            vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern(), 1000f); //TODO figure out what to make this value
             
             prevRadius = currRadius;
             prevAmtWalls = currAmtWalls;
@@ -117,7 +99,7 @@ public class SpawnWalls : MonoBehaviour
     /// Moves walls to new positions based on the currently defined pattern
     /// </summary>
     /// <returns>New vertex pattern</returns>
-    List<Vector3> TranslateWallsToNewPositions(List<Vector3> vertexPattern, float moveSpeed, float rotationSpeed)
+    List<Vector3> TranslateWallsToNewPositions(List<Vector3> vertexPattern, float moveSpeed)
     {
         int i = 0;
         for (; i < vertexPattern.Count; i++)
@@ -126,6 +108,7 @@ public class SpawnWalls : MonoBehaviour
             Vector3 nextVertex = vertexPattern[(i + 1) % vertexPattern.Count]; // Wrap around to the first point
             
             //In case we're dynamically adding wall(s)
+            //This will always equal the Count since we add one to the list in this case
             if (i == walls.Count)
             {
                 Vector3 wallPosition = (currVertex + nextVertex) / 2f;
@@ -140,16 +123,7 @@ public class SpawnWalls : MonoBehaviour
 
             if (currWall != null)
             {
-                Vector3 currWallPosition = currWall.transform.position;
-                Vector3 nextWallPosition = (new Vector3(currVertex.x, currWallPosition.y, currVertex.z) + new Vector3(nextVertex.x, currWallPosition.y, nextVertex.z)) / 2f;
-
-                currWall.transform.position = Vector3.Lerp(currWallPosition, nextWallPosition, Time.deltaTime * moveSpeed);
-
-                Quaternion wallRotation = Quaternion.LookRotation(nextVertex - currVertex);
-                currWall.transform.rotation = Quaternion.Slerp(currWall.transform.rotation, wallRotation, Time.deltaTime * rotationSpeed);
-
-                float newWallLength = Vector3.Distance(currVertex, vertexPattern[(i + 1) % vertexPattern.Count]);
-                currWall.transform.localScale = new Vector3(currWall.transform.localScale.x, currWall.transform.localScale.y, newWallLength);
+                StartCoroutine(MoveAndRotateWall(currWall, currVertex, nextVertex, moveSpeed));
             }
         }
 
@@ -168,5 +142,41 @@ public class SpawnWalls : MonoBehaviour
         }
 
         return vertexPattern;
+    }
+
+    private IEnumerator MoveAndRotateWall(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed)
+    {
+        Vector3 currWallPosition = currWall.transform.position;
+        Vector3 nextWallPosition = (new Vector3(currVertex.x, currWallPosition.y, currVertex.z) + new Vector3(nextVertex.x, currWallPosition.y, nextVertex.z)) / 2f;
+
+        Quaternion startRotation = currWall.transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(nextVertex - currVertex);
+
+        Vector3 startScale = currWall.transform.localScale;
+        float newWallLength = Vector3.Distance(currVertex, nextVertex);
+        Vector3 targetScale = new Vector3(startScale.x, startScale.y, newWallLength);
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < 1f)
+        {
+            elapsedTime += Time.deltaTime * moveSpeed;
+
+            // Lerp position over time
+            currWall.transform.position = Vector3.Lerp(currWallPosition, nextWallPosition, elapsedTime);
+
+            // Slerp rotation over time
+            currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
+
+            // Lerp scale over time
+            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
+
+            yield return null;
+        }
+
+        // Final adjustments to ensure accuracy
+        currWall.transform.position = nextWallPosition;
+        currWall.transform.rotation = targetRotation;
+        currWall.transform.localScale = targetScale;
     }
 }
