@@ -5,44 +5,76 @@ using UnityEngine;
 public class SpawnWalls : MonoBehaviour
 {
     public GameObject wallPrefab;
-    public int numberOfWalls = 10;
-    public float radius = 10;
-    public GameObject[] walls;
+    public int numberOfWalls;
+    public float radius;
 
-    private float wallWidthPaddingPercentage = 0.057f;
+    //public List<Vector3> walls = new List<GameObject>();
+    public List<Vector3> vertices;
+
+    private float wallWidthPadding = 0.579f;
 
     void Start()
     {
-        walls = new GameObject[numberOfWalls];
-        SpawnWallsInCircle();
+        vertices = DefineInfinityPattern(numberOfWalls, radius);
+        
+        SpawnWallsAtPositions();
     }
 
-    void SpawnWallsInCircle()
+    void SpawnWallsAtPositions()
     {
-        // Calculate the angle between each wall
-        float angleStep = 360.0f / numberOfWalls;
+        for (int i = 0; i < vertices.Count; i++)
+        {
+            Vector3 vertex = vertices[i];
+            Vector3 nextVertex = vertices[(i + 1) % vertices.Count]; // Wrap around to the first point// Calculate the position and rotation for the wall
+            Vector3 wallPosition = (vertex + nextVertex) / 2f;
+            Quaternion wallRotation = Quaternion.LookRotation(nextVertex - vertex);
+
+            // Calculate the length of the wall
+            float wallLength = Vector3.Distance(vertex, nextVertex);
+            //float padding = wallLength * wallWidthPaddingPercentage;
+
+            // Instantiate the wall prefab
+            GameObject wall = Instantiate(wallPrefab, wallPosition, wallRotation);
+            wall.transform.localScale = new Vector3(wall.transform.localScale.x, wall.transform.localScale.y, wallLength);
+        }
+    }
+
+    List<Vector3> DefineCircularPattern(int amtVertices, float radius)
+    {
+        List<Vector3> vertices = new List<Vector3>();
+
+        float angleStep = 360.0f / amtVertices;
         float angleStepRadians = angleStep * Mathf.Deg2Rad;
 
-        for (int i = 0; i < numberOfWalls; i++)
+        for (int i = 0; i < amtVertices; i++)
         {
-            // Determine the position of the wall
-            Vector3 wallPosition = new Vector3(
+            Vector3 position = new Vector3(
                 transform.position.x + Mathf.Cos(i * angleStepRadians) * radius,
-                transform.position.y,
+                0,
                 transform.position.z + Mathf.Sin(i * angleStepRadians) * radius
             );
-
-            // Instantiate the wall at the calculated position
-            GameObject wall = Instantiate(wallPrefab, wallPosition, Quaternion.identity);
-            walls[i] = wall;
-
-            // Adjust the wall's position so that the edge is on the circle
-            float wallWidth = 2 * radius * Mathf.Sin(angleStepRadians / 2);
-            float padding = wallWidth * wallWidthPaddingPercentage; //Add the padding to ensure no gaps
-            wall.transform.localScale = new Vector3(wallWidth + padding, wall.transform.localScale.y, wall.transform.localScale.z);
-
-            // Rotate the wall to face the centerPoint
-            wall.transform.LookAt(transform.position);
+            vertices.Add(position);
         }
+
+        return vertices;
+    }
+
+    List<Vector3> DefineInfinityPattern(int amtVertices, float radius)
+    {
+        List<Vector3> vertices = new List<Vector3>();
+
+        float angleStep = 2 * Mathf.PI / amtVertices;
+
+        for (int i = 0; i < amtVertices; i++)
+        {
+            float t = i * angleStep;
+            float x = (Mathf.Sin(t) * radius) / (1 + Mathf.Pow(Mathf.Cos(t), 2));
+            float z = (Mathf.Sin(t) * Mathf.Cos(t) * radius * 1.5f) / (1 + Mathf.Pow(Mathf.Cos(t), 2));
+
+            Vector3 position = new Vector3(x, 0, z);
+            vertices.Add(position);
+        }
+
+        return vertices;
     }
 }
