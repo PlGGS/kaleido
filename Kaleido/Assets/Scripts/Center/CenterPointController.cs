@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpawnWalls : MonoBehaviour
+public class CenterPointController : MonoBehaviour
 {
     public GameObject wallPrefab;
 
