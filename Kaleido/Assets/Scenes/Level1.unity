@@ -371,7 +371,7 @@ MonoBehaviour:
   player: {fileID: 748543491}
   centerPoint: {fileID: 1931987054}
   forwardOffset: 2
-  heightOffset: 20
+  heightOffset: 30
   followSpeed: 0.001
   rotationSpeed: 12
 --- !u!4 &1318201762 stripped
@@ -390,6 +390,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1931987055}
   - component: {fileID: 1931987056}
+  - component: {fileID: 1931987058}
+  - component: {fileID: 1931987057}
   m_Layer: 0
   m_Name: centerPoint
   m_TagString: Untagged
@@ -434,6 +436,42 @@ MonoBehaviour:
   currPatternDefinition: 2
   prevPatternDefinition: 0
   vertices: []
+--- !u!114 &1931987057
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931987054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 229abdc8314c9064198dcff221a98995, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 1931987058}
+  enemySpeedMultiplier: 1.1
+  enemyHealthMultiplier: 1.1
+--- !u!114 &1931987058
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931987054}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9557a000d0e53a04c8647b3b5495c338, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  centerPointController: {fileID: 1931987056}
+  difficultyManager: {fileID: 1931987057}
+  redEnemyPrefab: {fileID: 0}
+  pinkEnemyPrefab: {fileID: 0}
+  cyanEnemyPrefab: {fileID: 0}
+  orangeEnemyPrefab: {fileID: 0}
+  currentLevel: 1
+  baseSpawnRate: 1
+  baseEnemyCount: 5
 --- !u!1001 &7405641243355095029
 PrefabInstance:
   m_ObjectHideFlags: 0
