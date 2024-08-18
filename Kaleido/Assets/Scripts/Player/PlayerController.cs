@@ -132,6 +132,12 @@ public class PlayerController : MonoBehaviour
                 // Set player position to the center of the wall
                 transform.position = new Vector3(wall.transform.position.x, 0.5f, wall.transform.position.z);
                 transform.rotation = wall.transform.rotation;
+
+                /*
+                Vector3 currentWallRotation = wall.transform.rotation.eulerAngles;
+                currentWallRotation.y -= 90f;
+                transform.rotation = Quaternion.Euler(currentWallRotation);
+                */
             }
         }
         else

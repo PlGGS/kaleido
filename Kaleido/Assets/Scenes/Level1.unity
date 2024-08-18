@@ -246,7 +246,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centerPoint: {fileID: 1931987054}
-  moveInterval: 0.04
+  moveInterval: 0.03
 --- !u!4 &748543493
 Transform:
   m_ObjectHideFlags: 0
@@ -274,6 +274,7 @@ GameObject:
   - component: {fileID: 963194228}
   - component: {fileID: 963194227}
   - component: {fileID: 963194226}
+  - component: {fileID: 963194229}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -355,6 +356,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
+--- !u!114 &963194229
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 963194225}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a5e4c9d4f67e03448e3e6a4c1636f44, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 748543491}
+  centerPoint: {fileID: 1931987054}
+  forwardOffset: 2
+  heightOffset: 15
+  followSpeed: 0.001
+  rotationSpeed: 12
 --- !u!4 &1318201762 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6764680864529253145, guid: 63495fb6e898be04b915200d8933ff23,
@@ -410,7 +429,7 @@ MonoBehaviour:
   walls: []
   currAmtWalls: 24
   prevAmtWalls: 0
-  currRadius: 5
+  currRadius: 7
   prevRadius: 0
   currPatternDefinition: 2
   prevPatternDefinition: 0
@@ -427,6 +446,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: cylinder
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913151788810561204, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913151788810561204, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913151788810561204, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3913151788810561204, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6764680864529253145, guid: 63495fb6e898be04b915200d8933ff23,
         type: 3}
@@ -483,6 +522,26 @@ PrefabInstance:
       propertyPath: centerPoint
       value: 
       objectReference: {fileID: 1931987054}
+    - target: {fileID: 8479645951156448045, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8479645951156448045, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8479645951156448045, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8479645951156448045, guid: 63495fb6e898be04b915200d8933ff23,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 7498204832835561214, guid: 63495fb6e898be04b915200d8933ff23, type: 3}
     m_RemovedGameObjects: []

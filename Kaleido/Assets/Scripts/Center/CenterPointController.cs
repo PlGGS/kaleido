@@ -42,7 +42,7 @@ public class CenterPointController : MonoBehaviour
     {
         if (currRadius != prevRadius || currAmtWalls != prevAmtWalls || currPatternDefinition != prevPatternDefinition)
         {
-            StopAllCoroutines();
+            StopAllWallCoroutines();
 
             vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern());
             
@@ -280,7 +280,7 @@ public class CenterPointController : MonoBehaviour
         return (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale); 
     }
 
-    void StopAllCoroutines()
+    void StopAllWallCoroutines()
     {
         foreach (var coroutine in runningCoroutines)
         {
