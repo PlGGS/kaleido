@@ -14,17 +14,11 @@ public class CenterPointController : MonoBehaviour
     [HideInInspector]
     public int prevAmtWalls;
 
-    public float currRadius
-    {
-        get { return currRadius; }
-        set { currRadius = Mathf.Max(value, 10f); } // Minimum value of 10
-    }
+    [Range(10f, 1000f)]
+    public float currRadius;
     [HideInInspector]
-    public float prevRadius
-    {
-        get { return currRadius; }
-        set { currRadius = Mathf.Max(value, 10f); } // Minimum value of 10
-    }
+    [Range(10f, 1000f)]
+    public float prevRadius;
 
     public VertexPattern.Patterns currPatternDefinition;
     [HideInInspector]
