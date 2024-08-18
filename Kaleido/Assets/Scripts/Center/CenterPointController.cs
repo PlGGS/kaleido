@@ -14,9 +14,17 @@ public class CenterPointController : MonoBehaviour
     [HideInInspector]
     public int prevAmtWalls;
 
-    public float currRadius;
+    public float currRadius
+    {
+        get { return currRadius; }
+        set { currRadius = Mathf.Max(value, 10f); } // Minimum value of 10
+    }
     [HideInInspector]
-    public float prevRadius;
+    public float prevRadius
+    {
+        get { return currRadius; }
+        set { currRadius = Mathf.Max(value, 10f); } // Minimum value of 10
+    }
 
     public VertexPattern.Patterns currPatternDefinition;
     [HideInInspector]
@@ -105,7 +113,6 @@ public class CenterPointController : MonoBehaviour
 
         // Calculate the length of the wall
         float wallLength = Vector3.Distance(currVertex, nextVertex);
-        //float padding = wallLength * wallWidthPadding;
 
         // Instantiate the wall prefab
         GameObject wall = Instantiate(wallPrefab, wallPosition, wallRotation);

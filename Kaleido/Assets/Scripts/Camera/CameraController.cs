@@ -7,7 +7,7 @@ public class CameraController : MonoBehaviour
     public GameObject player;           // The player object to follow
     public GameObject centerPoint;      // The center point that the camera will face
     public float forwardOffset = 2f;    // Distance behind the player
-    public float heightOffset = 15f;     // Height offset for the camera
+    public float heightOffset = 20f;     // Height offset for the camera
     public float followSpeed = 2f;      // Speed at which the camera follows the player
     public float rotationSpeed = 5f;    // Speed at which the camera rotates to face the CenterPoint
 
@@ -20,23 +20,40 @@ public class CameraController : MonoBehaviour
             //Position
             //------------------------------------------------
 
-            Vector3 distanceFromCenter = player.transform.position - centerPoint.transform.position;
+            // Compute the direction from the player to the center point
+            Vector3 directionToCenter = (centerPoint.transform.position - player.transform.position).normalized;
+            directionToCenter.y = 0f;
+
+            // Check if the player is on the left or right of the center point
+            float dotProduct = Vector3.Dot(directionToCenter, player.transform.right.normalized);
+            //Debug.Log($"Player right: {player.transform.right}, dir to center: {directionToCenter}, {dotProduct}, on the right: {dotProduct}");
 
             // Desired position is behind the player, at a specific distance and height
             Vector3 desiredPosition;
-            if (distanceFromCenter.x > 0)
+            if (dotProduct > 0f)
             {
                 // Player is on the right side, so camera should be in front
-                desiredPosition = player.transform.position + (player.transform.right * forwardOffset) + (Vector3.up * heightOffset);
+                desiredPosition = player.transform.position + (player.transform.right.normalized * forwardOffset) + (Vector3.up * heightOffset);
             }
             else
             {
                 // Player is on the left side, so camera should be behind
-                desiredPosition = player.transform.position + (player.transform.right * -forwardOffset) + (Vector3.up * heightOffset);
+                desiredPosition = player.transform.position + (player.transform.right.normalized * -forwardOffset) + (Vector3.up * heightOffset);
             }
+            
+            // live, laugh, love
+            //Debug.Log($"Player right: {player.transform.right.normalized}, Direction to center: {directionToCenter}, Dot product: {dotProduct}, Desired position: {desiredPosition}, Adjusted position: {desiredPosition}");
+            //Debug.DrawLine(player.transform.position, centerPoint.transform.position, Color.red);
+            //Debug.DrawLine(centerPoint.transform.position, player.transform.position, Color.green);
+            //Debug.DrawRay(player.transform.position, player.transform.right.normalized, Color.blue);
+            //Debug.DrawRay(new Vector3(centerPoint.transform.position.x + 10, centerPoint.transform.position.y, centerPoint.transform.position.z + 10), 
+              //  new Vector3(centerPoint.transform.position.x + 10, centerPoint.transform.position.y, dotProduct * 100 + 10), Color.cyan);
+            //Debug.DrawRay(new Vector3(centerPoint.transform.position.x + 10, centerPoint.transform.position.y, centerPoint.transform.position.z), 
+              //  new Vector3(centerPoint.transform.position.x + 10, centerPoint.transform.position.y, centerPoint.transform.position.z), Color.black);
 
             // Smoothly move the camera to the desired position
             transform.position = Vector3.SmoothDamp(transform.position, desiredPosition, ref currentVelocity, followSpeed);
+
 
 
             //Rotation

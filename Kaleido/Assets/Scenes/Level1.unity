@@ -371,7 +371,7 @@ MonoBehaviour:
   player: {fileID: 748543491}
   centerPoint: {fileID: 1931987054}
   forwardOffset: 2
-  heightOffset: 15
+  heightOffset: 20
   followSpeed: 0.001
   rotationSpeed: 12
 --- !u!4 &1318201762 stripped
@@ -429,7 +429,7 @@ MonoBehaviour:
   walls: []
   currAmtWalls: 24
   prevAmtWalls: 0
-  currRadius: 7
+  currRadius: 10
   prevRadius: 0
   currPatternDefinition: 2
   prevPatternDefinition: 0
