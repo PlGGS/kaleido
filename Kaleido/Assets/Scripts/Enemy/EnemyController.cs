@@ -5,14 +5,38 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     public GameObject centerPoint;
-    private CenterPointController centerPointController;
-    private int currentWallIndex;
 
-    public float moveInterval = 0.05f; // Time in seconds to move to the next wall
-    private float timeSinceLastMove = 1f;
+    private GameObject currWall;
+    private int currWallIndex;
+    public GameObject GetCurrWall()
+    {
+        return currWall;
+    }
+    public int GetCurrWallIndex()
+    {
+        return currWallIndex;
+    }
+    public void SetCurrWall(GameObject wall, int index)
+    {
+        currWall = wall;
+        currWallIndex = index;
+    }
 
-    private bool isMovingLeft = false;
-    private bool isMovingRight = false;
+    private GameObject prevWall;
+    private int prevWallIndex;
+    public GameObject GetPrevWall()
+    {
+        return prevWall;
+    }
+    public int GetPrevWallIndex()
+    {
+        return prevWallIndex;
+    }
+    public void SetPrevWall(GameObject wall, int index)
+    {
+        prevWall = wall;
+        prevWallIndex = index;
+    }
 
     [Range(0, 100)]
     [SerializeField]
@@ -25,12 +49,14 @@ public class EnemyController : MonoBehaviour
 
     [Range(1, 100)]
     [SerializeField]
-    private int speed = 1;
-    public int Speed
+    private float moveSpeed = 1f;
+    public float MoveSpeed
     {
-        get { return speed; }
-        set { speed = Mathf.Clamp(value, 1, 100); }
+        get { return moveSpeed; }
+        set { moveSpeed = Mathf.Clamp(value, 1f, 100f); }
     }
+
+    protected bool isMoving = false;
 
     public Types type;
     public enum Types
@@ -44,21 +70,22 @@ public class EnemyController : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        if (centerPoint != null)
+        prevWall = currWall;
+
+        switch (type)
         {
-            centerPointController = centerPoint.GetComponent<CenterPointController>();
-            if (centerPointController != null)
-            {
-                //StartCoroutine(InitializeAndMoveToFirstWall());
-            }
-            else
-            {
-                Debug.LogError("CenterPointController component not found");
-            }
-        }
-        else
-        {
-            Debug.LogError("CenterPoint is not assigned");
+            case Types.Red:
+                health = 50;
+                moveSpeed = 10;
+                break;
+            case Types.Blue:
+                break;
+            case Types.Cyan:
+                break;
+            case Types.Orange:
+                break;
+            default:
+                break;
         }
     }
 
@@ -66,5 +93,60 @@ public class EnemyController : MonoBehaviour
     protected virtual void Update()
     {
         
+    }
+
+    protected IEnumerator TranslateEnemyAtMoveSpeed(Vector3 targetPosition)
+    {
+        // Wait until the next frame to ensure Start has been called
+        yield return null;
+
+        Vector3 startPosition = transform.position;
+
+        float distance = Vector3.Distance(transform.position, targetPosition);
+        float remainingDistance = distance;
+        while (remainingDistance > 0)
+        {
+            //Check again if the attached script is missing (meaning the wall was destroyed)
+            if (this.gameObject == null) yield break;
+
+            WallController wallController = GetCurrWallController();
+            wallController.Elongate(remainingDistance);
+
+            // Lerp position over time
+            transform.position = Vector3.Lerp(startPosition, targetPosition, 1 - (remainingDistance / distance));
+
+            remainingDistance -= Time.deltaTime * moveSpeed;
+
+            yield return null;
+        }
+
+        //Check again if the attached script is missing (meaning the wall was destroyed)
+        if (this.gameObject == null) yield break;
+
+        // Final adjustments to ensure accuracy
+        transform.position = targetPosition;
+        GetCenterPointController().RemoveWallAt(currWallIndex);
+    }
+
+    CenterPointController GetCenterPointController()
+    {
+        if (centerPoint != null)
+        {
+            return centerPoint.GetComponent<CenterPointController>();
+        }
+
+        Debug.LogError("CenterPoint is not assigned");
+        return null;
+    }
+
+    WallController GetCurrWallController()
+    {
+        if (currWall != null)
+        {
+            return currWall.GetComponent<WallController>();
+        }
+
+        Debug.LogError("CenterPoint is not assigned");
+        return null;
     }
 }

@@ -47,7 +47,7 @@ public class CenterPointController : MonoBehaviour
             StopAllWallCoroutines();
 
             vertices = TranslateWallsToNewPositions(MapToCurrentVertexPattern());
-            
+
             prevRadius = currRadius;
             prevAmtWalls = currAmtWalls;
             prevPatternDefinition = currPatternDefinition;
@@ -78,6 +78,43 @@ public class CenterPointController : MonoBehaviour
         }
 
         return newVertices;
+    }
+
+    /// <summary>
+    /// Returns a wall that's not being eaten along with its index
+    /// </summary>
+    /// <returns>Returns (null, -1) if there are no walls available to be eaten</returns>
+    public (GameObject, int) GetRandomWall()
+    {
+        //TODO maybe get walls that are being eaten and just move the enemies currently eating them up a bit to create a line of defence for the enemies on that wall
+
+        // List to keep track of indices that are being checked or already checked
+        List<int> checkedIndices = new List<int>();
+
+        int index;
+        do
+        {
+            index = GetRandomWallIndex();
+
+            if (!walls[index].GetComponent<WallController>().isBeingEaten && !checkedIndices.Contains(index))
+            {
+                return (walls[index], index);
+            }
+
+            checkedIndices.Add(index);
+
+        } while (checkedIndices.Count < walls.Count);
+
+        return (null, -1);
+    }
+
+    public int GetRandomWallIndex() {
+        return UnityEngine.Random.Range(0, walls.Count - 1);
+    }
+
+    public GameObject GetWall(int index)
+    {
+        return walls[index];
     }
 
     List<Vector3> SpawnWallsAtPositions(List<Vector3> vertexPattern)
@@ -157,12 +194,17 @@ public class CenterPointController : MonoBehaviour
             {
                 //Debug.Log("Ay I'm destroying walls here");
 
-                Destroy(walls[i]);
-                walls.RemoveAt(i);
+                RemoveWallAt(i);
             }
         }
 
         return vertexPattern;
+    }
+
+    public void RemoveWallAt(int index)
+    {
+        Destroy(walls[index]);
+        walls.RemoveAt(index);
     }
 
     private IEnumerator TranslateWallAtSpeed(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed = defaultWallMoveSpeed)

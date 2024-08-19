@@ -18,6 +18,10 @@ public class RedEnemyController : EnemyController
     {
         base.Update();
 
-
+        if (isMoving == false)
+        {
+            StartCoroutine(TranslateEnemyAtMoveSpeed(GetCurrWall().GetComponent<WallController>().GetWallTopCenterPosition())); //TODO this is shit but for now it's fine
+            isMoving = true;
+        }
     }
 }

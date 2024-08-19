@@ -431,7 +431,7 @@ MonoBehaviour:
   walls: []
   currAmtWalls: 24
   prevAmtWalls: 0
-  currRadius: 10
+  currRadius: 15
   prevRadius: 0
   currPatternDefinition: 2
   prevPatternDefinition: 0
@@ -465,13 +465,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   centerPointController: {fileID: 1931987056}
   difficultyManager: {fileID: 1931987057}
-  redEnemyPrefab: {fileID: 0}
-  pinkEnemyPrefab: {fileID: 0}
-  cyanEnemyPrefab: {fileID: 0}
-  orangeEnemyPrefab: {fileID: 0}
+  redEnemyPrefab: {fileID: 6247801177375871610, guid: 8631e7ea41f617e42a299838c4d4852e,
+    type: 3}
+  pinkEnemyPrefab: {fileID: 6549489498906849085, guid: 9eb35c1b0cf9c544b8a1d938673fa66e,
+    type: 3}
+  cyanEnemyPrefab: {fileID: 6233816891270266475, guid: 1f05fac94a7fb6d409f4a21a93757f41,
+    type: 3}
+  orangeEnemyPrefab: {fileID: 3148508930333739825, guid: 73aae01be4c6a2249b0ddc1f5c88cf21,
+    type: 3}
+  levelUpText: {fileID: 0}
+  levelUpSound: {fileID: 0}
+  audioSource: {fileID: 0}
   currentLevel: 1
-  baseSpawnRate: 1
-  baseEnemyCount: 5
+  baseSpawnRate: 3
+  baseWaveSpawnRate: 1
+  baseEnemyCount: 3
+  levelUpDelay: 2
 --- !u!1001 &7405641243355095029
 PrefabInstance:
   m_ObjectHideFlags: 0

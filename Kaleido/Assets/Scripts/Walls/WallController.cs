@@ -11,6 +11,7 @@ public class WallController : MonoBehaviour
     private float prevElongationFactor;
 
     public float moveSpeed = 1f;
+    public bool isBeingEaten = false;
 
     void Start()
     {
@@ -26,19 +27,29 @@ public class WallController : MonoBehaviour
     {
         if (currElongationFactor != prevElongationFactor)
         {
-            Elongate();
+            Elongate(currElongationFactor);
 
             prevElongationFactor = currElongationFactor;
         }
     }
 
-    void Elongate()
+    public Vector3 GetWallTopCenterPosition()
+    {
+        return transform.position + new Vector3(0, transform.localScale.y / 2, 0);
+    }
+
+    public Vector3 GetWallBottomCenterPosition()
+    {
+        return transform.position - new Vector3(0, transform.localScale.y / 2, 0);
+    }
+
+    public void Elongate(float elongationFactor)
     {
         // Calculate the new Y scale based on the elongation factor
-        float newYScale = originalScale.y * currElongationFactor;
+        float newYScale = originalScale.y * elongationFactor;
 
         // Calculate the offset to keep the top of the cube stationary
-        float yOffset = (newYScale - originalScale.y) / 2.0f;
+        float yOffset = newYScale / 2.0f;
 
         // Apply the new scale
         transform.localScale = new Vector3(originalScale.x, newYScale, originalScale.z);
