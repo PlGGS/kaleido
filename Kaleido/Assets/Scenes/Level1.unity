@@ -426,7 +426,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 587e3313bfb6d0b49976334c665740e5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wallPrefab: {fileID: 1710287575324640997, guid: 30da2ab185b603345a4d684b41a10eee,
+  wallPrefab: {fileID: 8738179780824218258, guid: 7c1f0ef18a5e12840a14b55565d7c649,
     type: 3}
   walls: []
   currAmtWalls: 24

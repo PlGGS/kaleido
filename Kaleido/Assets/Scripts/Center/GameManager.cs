@@ -42,18 +42,19 @@ public class GameManager : MonoBehaviour
 
             for (int i = 0; i < enemyCount; i++)
             {
-                (GameObject wall, int index) = centerPointController.GetRandomWall();
+                GameObject wall = centerPointController.GetRandomWall();
 
                 if (wall != null)
                 {
-                    WallController wallController = wall.GetComponent<WallController>();
+                    WallController wallController = wall.GetComponentInChildren<WallController>();
                     //TODO only set the wall to being eaten if we spawn a red enemy
                     wallController.isBeingEaten = true;
 
-                    GameObject enemy = Instantiate(redEnemyPrefab, wallController.GetWallBottomCenterPosition(), Quaternion.identity);
+                    GameObject enemy = Instantiate(redEnemyPrefab, wallController.GetRectBottomCenterPosition(), Quaternion.identity);
+                    enemy.transform.SetParent(wall.transform, false);
+                    //enemy.transform.position = wallController.GetWallBottomCenterPosition();
                     EnemyController enemyController = enemy.GetComponent<EnemyController>();
                     enemyController.centerPoint = this.gameObject;
-                    enemyController.SetCurrWall(wall, index);
                 }
 
                 yield return new WaitForSeconds(spawnRate);

@@ -6,37 +6,8 @@ public class EnemyController : MonoBehaviour
 {
     public GameObject centerPoint;
 
-    private GameObject currWall;
-    private int currWallIndex;
-    public GameObject GetCurrWall()
-    {
-        return currWall;
-    }
-    public int GetCurrWallIndex()
-    {
-        return currWallIndex;
-    }
-    public void SetCurrWall(GameObject wall, int index)
-    {
-        currWall = wall;
-        currWallIndex = index;
-    }
-
-    private GameObject prevWall;
-    private int prevWallIndex;
-    public GameObject GetPrevWall()
-    {
-        return prevWall;
-    }
-    public int GetPrevWallIndex()
-    {
-        return prevWallIndex;
-    }
-    public void SetPrevWall(GameObject wall, int index)
-    {
-        prevWall = wall;
-        prevWallIndex = index;
-    }
+    public GameObject currWall;
+    public GameObject prevWall;
 
     [Range(0, 100)]
     [SerializeField]
@@ -56,7 +27,7 @@ public class EnemyController : MonoBehaviour
         set { moveSpeed = Mathf.Clamp(value, 1f, 100f); }
     }
 
-    protected bool isMoving = false;
+    public Vector3 targetPosition;
 
     public Types type;
     public enum Types
@@ -76,7 +47,7 @@ public class EnemyController : MonoBehaviour
         {
             case Types.Red:
                 health = 50;
-                moveSpeed = 10;
+                moveSpeed = 1;
                 break;
             case Types.Blue:
                 break;
@@ -97,7 +68,7 @@ public class EnemyController : MonoBehaviour
 
     protected IEnumerator TranslateEnemyAtMoveSpeed(Vector3 targetPosition)
     {
-        // Wait until the next frame to ensure Start has been called
+        // Wait until the next frame to ensure Start has been calledG
         yield return null;
 
         Vector3 startPosition = transform.position;
@@ -109,7 +80,7 @@ public class EnemyController : MonoBehaviour
             //Check again if the attached script is missing (meaning the wall was destroyed)
             if (this.gameObject == null) yield break;
 
-            WallController wallController = GetCurrWallController();
+            WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
             wallController.Elongate(remainingDistance);
 
             // Lerp position over time
@@ -125,25 +96,14 @@ public class EnemyController : MonoBehaviour
 
         // Final adjustments to ensure accuracy
         transform.position = targetPosition;
-        GetCenterPointController().RemoveWallAt(currWallIndex);
+        GetCenterPointController().RemoveWall(currWall);
     }
 
-    CenterPointController GetCenterPointController()
+    protected CenterPointController GetCenterPointController()
     {
         if (centerPoint != null)
         {
             return centerPoint.GetComponent<CenterPointController>();
-        }
-
-        Debug.LogError("CenterPoint is not assigned");
-        return null;
-    }
-
-    WallController GetCurrWallController()
-    {
-        if (currWall != null)
-        {
-            return currWall.GetComponent<WallController>();
         }
 
         Debug.LogError("CenterPoint is not assigned");

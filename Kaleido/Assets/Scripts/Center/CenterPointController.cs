@@ -84,28 +84,31 @@ public class CenterPointController : MonoBehaviour
     /// Returns a wall that's not being eaten along with its index
     /// </summary>
     /// <returns>Returns (null, -1) if there are no walls available to be eaten</returns>
-    public (GameObject, int) GetRandomWall()
+    public GameObject GetRandomWall()
     {
         //TODO maybe get walls that are being eaten and just move the enemies currently eating them up a bit to create a line of defence for the enemies on that wall
 
-        // List to keep track of indices that are being checked or already checked
-        List<int> checkedIndices = new List<int>();
-
-        int index;
-        do
+        if (walls.Count > 0)
         {
-            index = GetRandomWallIndex();
+            // List to keep track of indices that are being checked or already checked
+            List<int> checkedIndices = new List<int>();
 
-            if (!walls[index].GetComponent<WallController>().isBeingEaten && !checkedIndices.Contains(index))
+            int index;
+            do
             {
-                return (walls[index], index);
-            }
+                index = GetRandomWallIndex();
 
-            checkedIndices.Add(index);
+                if (!walls[index].GetComponentInChildren<WallController>().isBeingEaten && !checkedIndices.Contains(index))
+                {
+                    return walls[index];
+                }
 
-        } while (checkedIndices.Count < walls.Count);
+                checkedIndices.Add(index);
 
-        return (null, -1);
+            } while (checkedIndices.Count < walls.Count);
+        }
+
+        return null;
     }
 
     public int GetRandomWallIndex() {
@@ -147,7 +150,8 @@ public class CenterPointController : MonoBehaviour
 
         // Instantiate the wall prefab
         GameObject wall = Instantiate(wallPrefab, wallPosition, wallRotation);
-        wall.transform.localScale = new Vector3(wall.transform.localScale.x, wall.transform.localScale.y, wallLength);
+        Transform rect = wall.transform.GetChild(0);
+        rect.transform.localScale = new Vector3(rect.transform.localScale.x, rect.transform.localScale.y, wallLength);
 
         // Add wall to list of walls
         walls.Add(wall);
@@ -206,19 +210,27 @@ public class CenterPointController : MonoBehaviour
         Destroy(walls[index]);
         walls.RemoveAt(index);
     }
+    public void RemoveWall(GameObject wall)
+    {
+        walls.Remove(wall);
+        Destroy(wall);
+    }
 
     private IEnumerator TranslateWallAtSpeed(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed = defaultWallMoveSpeed)
     {
         // Wait until the next frame to ensure Start has been called
         yield return null;
 
-        // Get the ElongateBottom script from the wall
-        WallController wallController = currWall.GetComponent<WallController>();
+        // Get the rect of the wall
+        Transform rect = currWall.transform.GetChild(0);
+
+        // Get the WallController script from the wall
+        WallController wallController = rect.GetComponent<WallController>();
 
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -238,7 +250,7 @@ public class CenterPointController : MonoBehaviour
             currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, 1 - (remainingDistance / distance));
 
             // Lerp scale over time
-            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
+            rect.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
 
             remainingDistance -= Time.deltaTime * moveSpeed;
 
@@ -251,7 +263,7 @@ public class CenterPointController : MonoBehaviour
         // Final adjustments to ensure accuracy
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
-        currWall.transform.localScale = targetScale;
+        rect.transform.localScale = targetScale;
     }
 
     private IEnumerator TranslateWallOverDuration(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveDuration = defaultWallMoveDuration)
@@ -259,13 +271,16 @@ public class CenterPointController : MonoBehaviour
         // Wait until the next frame to ensure Start has been called
         yield return null;
 
-        // Get the ElongateBottom script from the wall
-        WallController wallController = currWall.GetComponent<WallController>();
+        // Get the rect of the wall
+        Transform rect = currWall.transform.GetChild(0);
+
+        // Get the WallController script from the wall
+        WallController wallController = rect.GetComponent<WallController>();
 
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         //if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -284,7 +299,7 @@ public class CenterPointController : MonoBehaviour
             currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
 
             // Lerp scale over time
-            currWall.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
+            rect.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
 
             //Debug.Log($"Moving wall: {currWall.name}, Elapsed seconds: {elapsedTime * moveDuration}");
 
@@ -299,26 +314,28 @@ public class CenterPointController : MonoBehaviour
         // Final adjustments to ensure accuracy
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
-        currWall.transform.localScale = targetScale;
+        rect.transform.localScale = targetScale;
     }
 
-    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject currWall, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
+    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject wall, Transform rect, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
     {
         // Calculate the new Y scale based on the elongation factor
-        float newYScale = wallController.originalScale.y * wallController.currElongationFactor;
+        //float newYScale = wallController.originalScale.y * wallController.currElongationFactor;
 
         // Calculate the offset to keep the top of the cube stationary
-        float yOffset = (newYScale - wallController.originalScale.y);
+        //float yOffset = (newYScale - wallController.originalScale.y);
 
-        Vector3 startPosition = currWall.transform.position;
-        Vector3 targetPosition = (new Vector3(currVertex.x, wallController.originalPosition.y, currVertex.z) + new Vector3(nextVertex.x, wallController.originalPosition.y - yOffset, nextVertex.z)) / 2f;
+        Vector3 startPosition = wall.transform.position;
 
-        Quaternion startRotation = currWall.transform.rotation;
+        //gets the position directly between the two edges of the wall
+        Vector3 targetPosition = (new Vector3(currVertex.x, wallController.originalPosition.y, currVertex.z) + new Vector3(nextVertex.x, wallController.originalPosition.y /*- yOffset*/, nextVertex.z)) / 2f;
+
+        Quaternion startRotation = wall.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(nextVertex - currVertex);
 
-        Vector3 startScale = currWall.transform.localScale;
+        Vector3 startScale = rect.transform.localScale;
         float newWallLength = Vector3.Distance(currVertex, nextVertex);
-        Vector3 targetScale = new Vector3(startScale.x, newYScale, newWallLength);
+        Vector3 targetScale = new Vector3(startScale.x, startScale.y /*newYScale*/, newWallLength);
 
         return (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale); 
     }
