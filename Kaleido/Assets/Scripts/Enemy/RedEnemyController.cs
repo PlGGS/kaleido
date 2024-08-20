@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class RedEnemyController : EnemyController
 {
+    public float remainingDistance;
+
     // Start is called before the first frame update
     protected override void Start()
     {
@@ -27,7 +30,8 @@ public class RedEnemyController : EnemyController
 
         float distance = Vector3.Distance(transform.position, transform.parent.GetChild(0).position);
         float remainingDistance = distance;
-        if (remainingDistance > 0)
+        //If the enemy is below the 
+        if (remainingDistance > 0 && transform.position.y < 0)
         {
             wallController.Elongate(remainingDistance);
 

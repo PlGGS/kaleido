@@ -230,7 +230,7 @@ public class CenterPointController : MonoBehaviour
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale, startLocalPosition, targetLocalPosition) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -251,9 +251,6 @@ public class CenterPointController : MonoBehaviour
 
             // Lerp scale over time
             rect.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
-
-            // Lerp local position of rect over time
-            rect.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, 1 - (remainingDistance / distance));
 
             remainingDistance -= Time.deltaTime * moveSpeed;
 
@@ -283,7 +280,7 @@ public class CenterPointController : MonoBehaviour
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale, startLocalPosition, targetLocalPosition) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         //if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -304,9 +301,6 @@ public class CenterPointController : MonoBehaviour
             // Lerp scale over time
             rect.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
 
-            // Lerp local position of rect over time
-            rect.localPosition = Vector3.Lerp(startLocalPosition, targetLocalPosition, elapsedTime);
-
             elapsedTime += Time.deltaTime * (1 / moveDuration);
             yield return null;
         }
@@ -320,29 +314,21 @@ public class CenterPointController : MonoBehaviour
         rect.transform.localScale = targetScale;
     }
 
-    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale, Vector3 startLocalPosition, Vector3 targetLocalPosition) GetWallTransformationData(GameObject wall, Transform rect, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
+    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject wall, Transform rect, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
     {
-        // Calculate the new Y scale based on the elongation factor
-        float newYScale = wallController.originalScale.y * wallController.currElongationFactor;
-
-        // Adjust the rect's local position to keep the top of the wall at y = 0
-        Vector3 startLocalPosition = rect.localPosition;
-        Vector3 targetLocalPosition = new Vector3(rect.localPosition.x, (newYScale - wallController.originalScale.y) / 2f, rect.localPosition.z);
-
         Vector3 startPosition = wall.transform.position;
 
-        // Calculate the position between the two vertices
-        Vector3 targetPosition = (new Vector3(currVertex.x, wallController.originalPosition.y, currVertex.z)
-            + new Vector3(nextVertex.x, wallController.originalPosition.y, nextVertex.z)) / 2f;
+        //gets the position directly between the two edges of the wall
+        Vector3 targetPosition = (new Vector3(currVertex.x, wallController.originalPosition.y, currVertex.z) + new Vector3(nextVertex.x, wallController.originalPosition.y, nextVertex.z)) / 2f;
 
         Quaternion startRotation = wall.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(nextVertex - currVertex);
 
         Vector3 startScale = rect.transform.localScale;
         float newWallLength = Vector3.Distance(currVertex, nextVertex);
-        Vector3 targetScale = new Vector3(startScale.x, newYScale, newWallLength);
+        Vector3 targetScale = new Vector3(startScale.x, startScale.y, newWallLength);
 
-        return (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale, startLocalPosition, targetLocalPosition);
+        return (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale);
     }
 
     void StopAllWallCoroutines()

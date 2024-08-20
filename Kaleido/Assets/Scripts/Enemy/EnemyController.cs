@@ -47,13 +47,19 @@ public class EnemyController : MonoBehaviour
         {
             case Types.Red:
                 health = 50;
-                moveSpeed = 1;
+                moveSpeed = 5;
                 break;
             case Types.Blue:
+                health = 50;
+                moveSpeed = 6;
                 break;
             case Types.Cyan:
+                health = 75;
+                moveSpeed = 4;
                 break;
             case Types.Orange:
+                health = 100;
+                moveSpeed = 3;
                 break;
             default:
                 break;
@@ -64,41 +70,6 @@ public class EnemyController : MonoBehaviour
     protected virtual void Update()
     {
         
-    }
-
-    protected IEnumerator TranslateEnemyAtMoveSpeed(Vector3 targetPosition)
-    {
-        // Wait until the next frame to ensure Start has been calledG
-        yield return null;
-
-        Vector3 startPosition = transform.position;
-
-        float distance = Vector3.Distance(transform.position, targetPosition);
-        float remainingDistance = distance;
-        while (remainingDistance > 0)
-        {
-            //Check again if the attached script is missing (meaning the wall was destroyed)
-            if (this.gameObject == null) yield break;
-
-            WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
-            wallController.Elongate(remainingDistance);
-            //wallController.currElongationFactor = remainingDistance;
-
-
-            // Lerp position over time
-            transform.position = Vector3.Lerp(startPosition, targetPosition, 1 - (remainingDistance / distance));
-
-            remainingDistance -= Time.deltaTime * moveSpeed;
-
-            yield return null;
-        }
-
-        //Check again if the attached script is missing (meaning the wall was destroyed)
-        if (this.gameObject == null) yield break;
-
-        // Final adjustments to ensure accuracy
-        transform.position = targetPosition;
-        GetCenterPointController().RemoveWall(currWall);
     }
 
     protected CenterPointController GetCenterPointController()
