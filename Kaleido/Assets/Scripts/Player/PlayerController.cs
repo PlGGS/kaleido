@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
     public float currShotChargeDelay = 1f; //Delay in seconds after the player shoots a charged shot
     public float chargeCoolDownMultiplier = 1f; //Multiplier for how quickly the player can shoot again after a charged shot
 
-    public float shotInterval = 0.1f; // Time in seconds to move to the next wall
+    public float shotInterval = 0.25f; // Time in seconds to move to the next wall
     private float timeSinceLastShot = 0f;
 
     private bool isMovingLeft = false;

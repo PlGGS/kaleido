@@ -1,12 +1,10 @@
 using System.Collections.Generic;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class GameController : MonoBehaviour
 {
-    public List<SceneAsset> scenes = new List<SceneAsset>();
     public string currSceneName;
     
     private TextMeshProUGUI mainMenuBestTimeTMP;
@@ -116,15 +114,6 @@ public class GameController : MonoBehaviour
 
     public void LoadScene(string sceneName)
     {
-        foreach (var scene in scenes)
-        {
-            if (scene.name == sceneName)
-            {
-                SceneManager.LoadScene(sceneName);
-                return;
-            }
-        }
-
-        Debug.LogError("Scene " + sceneName + " not found in the scenes list.");
+        SceneManager.LoadScene(sceneName);
     }
 }

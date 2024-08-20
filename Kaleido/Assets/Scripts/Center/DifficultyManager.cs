@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI; // Assuming you use UI Text for displaying level up text
 
@@ -52,7 +53,7 @@ public class DifficultyManager : MonoBehaviour
         spawnRateVariance = 0.5f;
         extraEnemyVariance = 1.0f;
         baseWaveCount = 3;
-        baseWaveSpawnRate = 10.0f;
+        baseWaveSpawnRate = 3.0f;
 
         centerPointController.currPatternDefinition = VertexPattern.Patterns.Circle;
         centerPointController.currAmtWalls = 6;
@@ -84,7 +85,7 @@ public class DifficultyManager : MonoBehaviour
         // Wait until the next frame to ensure walls have been created
         yield return null;
 
-        int waveCount = (baseWaveCount + /*I DONT HAVE TIME JUST CAST IT*/(int)GetRandomExtraEnemies()) + (currentLevel + 1);
+                  int waveCount = (baseWaveCount + /*I DONT HAVE TIME JUST CAST IT*/(int)GetRandomExtraEnemies()) + (currentLevel + 1);
 
         while (waveCount > 0)
         {
@@ -153,7 +154,6 @@ public class DifficultyManager : MonoBehaviour
 
     public void LevelUp()
     {
-        StopCoroutine(SpawnEnemies());
         StartCoroutine(LevelUpSequence());
     }
 
@@ -163,10 +163,14 @@ public class DifficultyManager : MonoBehaviour
         //levelUpText.text = "Level " + currentLevel;
         //levelUpText.gameObject.SetActive(true);
         //audioSource.PlayOneShot(levelUpSound);
-        Debug.Log($"Level {currentLevel + 1} Complete!!");
+        TextMeshProUGUI currLevelTMP = GameObject.Find("Level").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        currLevelTMP.text = $"Level {currentLevel + 1} Complete!";
+        //Debug.Log($"Level {currentLevel + 1} Complete!!");
 
         // Wait for the defined delay
         yield return new WaitForSeconds(levelUpDelay);
+
+        currLevelTMP.text = "";
 
         // Hide the text and begin next level
         //levelUpText.gameObject.SetActive(false);
