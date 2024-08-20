@@ -51,7 +51,7 @@ public class EnemyController : MonoBehaviour
         {
             case Types.Red:
                 health = 50;
-                moveSpeed = 5;
+                moveSpeed = 50;
                 break;
             case Types.Blue:
                 health = 50;

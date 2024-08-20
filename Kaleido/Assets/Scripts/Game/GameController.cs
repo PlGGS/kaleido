@@ -9,19 +9,29 @@ public class GameController : MonoBehaviour
     public List<SceneAsset> scenes = new List<SceneAsset>();
     public string currSceneName;
 
-    public TextMeshProUGUI bestTimeTMP;
+    private TextMeshProUGUI mainMenuBestTimeTMP;
+    private TextMeshProUGUI gameOverBestTimeTMP;
+    private TextMeshProUGUI gameOverYourTimeTMP;
     public float bestTime = 0;
     public float currTime = 0;
 
     public bool isGameOver = false;
 
-    void Awake()
-    {
-        // Prevent this GameObject from being destroyed on scene load
-        DontDestroyOnLoad(this.gameObject);
+    public static GameController Instance { get; private set; }
 
-        // Subscribe to the sceneLoaded event
-        SceneManager.sceneLoaded += OnSceneLoaded;
+    private void Awake()
+    {
+        // Check if there's already an instance of this object
+        if (Instance != null)
+        {
+            Destroy(gameObject); // Destroy the duplicate
+            return; // Just to be sure
+        }
+        
+        Instance = this; // Set this as the instance
+
+        DontDestroyOnLoad(gameObject); // Make it persist across scenes
+        SceneManager.sceneLoaded += OnSceneLoaded; // Subscribe to the sceneLoaded event
     }
 
     void Start()
@@ -30,45 +40,60 @@ public class GameController : MonoBehaviour
         Debug.Log(currSceneName);
     }
 
-    void Update()
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
+        currSceneName = scene.name;
+
         switch (currSceneName)
         {
             case "MainMenu":
-                if (Input.GetKeyDown(KeyCode.Return))
-                {
-                    LoadScene("Level1");
-                }
-
-                bestTimeTMP.text = $"Best Time: {TimeConverter.ConvertSecondsToTime(bestTime)}";
+                mainMenuBestTimeTMP = GameObject.Find("Best Time").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+                mainMenuBestTimeTMP.text = $"Best Time: {TimeConverter.ConvertSecondsToTime(bestTime)}";
                 break;
             case "Level1":
-                if (isGameOver == false)
-                {
-                    currTime += Time.deltaTime;
-                }
-                else
-                {
-                    if (currTime > bestTime)
-                        bestTime = currTime;
+                break;
+            case "GameOver":
+                isGameOver = true;
 
+                if (currTime > bestTime)
+                    bestTime = currTime;
 
-                }
+                gameOverBestTimeTMP = GameObject.Find("Best Time").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+                gameOverYourTimeTMP = GameObject.Find("Your Time").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+                gameOverBestTimeTMP.text = $"Best Time: {TimeConverter.ConvertSecondsToTime(bestTime)}";
+                gameOverYourTimeTMP.text = $"Your Time: {TimeConverter.ConvertSecondsToTime(currTime)}";
                 break;
             default:
                 break;
         }
     }
 
-    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    void Update()
     {
-        // Log the scene name whenever a new scene is loaded
-        currSceneName = scene.name;
+        switch (currSceneName)
+        {
+            case "MainMenu":
+                if (Input.GetKeyDown(KeyCode.Return))
+                    LoadScene("Level1");
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                    Application.Quit();
+                break;
+            case "Level1":
+                currTime += Time.deltaTime;
+                break;
+            case "GameOver":
+                if (Input.GetKeyDown(KeyCode.Return))
+                    LoadScene("Level1");
+                else if (Input.GetKeyDown(KeyCode.Escape))
+                    LoadScene("MainMenu");
+                break;
+            default:
+                break;
+        }
     }
 
     void OnDestroy()
     {
-        // Unsubscribe from the sceneLoaded event when the GameObject is destroyed
         SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 

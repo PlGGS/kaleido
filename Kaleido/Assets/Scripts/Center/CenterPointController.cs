@@ -59,6 +59,32 @@ public class CenterPointController : MonoBehaviour
         {
             currAmtWalls = walls.Count;
         }
+
+
+        //TODO put this in a coroutine to have the player watch the walls all disappear, then load the game over scene
+        if (currAmtWalls == VertexPattern.minWalls[(int)currPatternDefinition])
+        {
+            StartCoroutine(DestroyRemainingWallsAndLoadGameOverScene());
+        }
+
+        if (currAmtWalls <= 0)
+        {
+            GameController.Instance.LoadScene("GameOver");
+        }
+    }
+
+    public IEnumerator DestroyRemainingWallsAndLoadGameOverScene(float moveDuration = defaultWallMoveDuration)
+    {
+        // Loop over the list of walls
+        while (walls.Count > 0)
+        {
+            // Destroy the first wall in the list
+            GameObject wallToDestroy = walls[0];
+            walls.RemoveAt(0); // Remove the wall from the list
+
+            // Wait for half a second
+            yield return new WaitForSeconds(moveDuration);
+        }
     }
 
     List<Vector3> MapToCurrentVertexPattern()

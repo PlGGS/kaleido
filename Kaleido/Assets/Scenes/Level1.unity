@@ -248,7 +248,9 @@ MonoBehaviour:
   centerPoint: {fileID: 1931987054}
   standardBulletPrefab: {fileID: 4886777178343532025, guid: bcef60ebc97d2c844b7ccd31dd581201,
     type: 3}
+  currentWallIndex: 0
   moveInterval: 0.05
+  movementLockedByCenterPoint: 0
   defaultShotCharge: 1
   shotCharge: 1
   maxShotCharge: 10
@@ -459,9 +461,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 229abdc8314c9064198dcff221a98995, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameManager: {fileID: 1931987058}
-  enemySpeedMultiplier: 1.1
-  enemyHealthMultiplier: 1.1
 --- !u!114 &1931987058
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -475,7 +474,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centerPointController: {fileID: 1931987056}
-  difficultyManager: {fileID: 1931987057}
   redEnemyPrefab: {fileID: 6247801177375871610, guid: 8631e7ea41f617e42a299838c4d4852e,
     type: 3}
   pinkEnemyPrefab: {fileID: 6549489498906849085, guid: 9eb35c1b0cf9c544b8a1d938673fa66e,
@@ -488,10 +486,12 @@ MonoBehaviour:
   levelUpSound: {fileID: 0}
   audioSource: {fileID: 0}
   currentLevel: 1
-  baseSpawnRate: 3
+  baseSpawnRate: 0.1
+  spawnRateVariance: 0
+  extraEnemyVariance: 5
   baseWaveSpawnRate: 1
-  baseEnemyCount: 3
-  levelUpDelay: 2
+  baseEnemyCount: 5
+  levelUpDelay: 3
 --- !u!1001 &7405641243355095029
 PrefabInstance:
   m_ObjectHideFlags: 0

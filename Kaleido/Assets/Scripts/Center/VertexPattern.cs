@@ -6,9 +6,11 @@ public abstract class VertexPattern
 {
     public enum Patterns
     {
-        Circle = 1,
-        Infinity = 2
+        Circle = 0,
+        Infinity = 1
     }
+
+    public static int[] minWalls = { 3, 5 };
 
     public static List<Vector3> Circle(int amtVertices, float currRadius)
     {

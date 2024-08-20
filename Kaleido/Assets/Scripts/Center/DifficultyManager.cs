@@ -22,10 +22,12 @@ public class DifficultyManager : MonoBehaviour
 
     public int currentLevel = 1;
 
-    public float baseSpawnRate = 1.0f;
-    public float baseWaveSpawnRate = 5.0f;
+    public float baseSpawnRate = 1.0f; //Seconds between enemy spawns during a spawn wave
+    public float spawnRateVariance = 1.0f; //Max time in seconds we might add between two enemy spawn times
+    public float extraEnemyVariance = 1.0f; //Max time in seconds we might add between two enemy spawn times
+    public float baseWaveSpawnRate = 5.0f; //Seconds to wait before beginning to spawn another wave of enemies
     public int baseEnemyCount = 5;
-    public float levelUpDelay = 2.0f;
+    public float levelUpDelay = 3.0f;
 
     void Start()
     {
@@ -39,8 +41,8 @@ public class DifficultyManager : MonoBehaviour
 
         while (true)
         {
-            float spawnRate = baseSpawnRate / currentLevel; // Decrease spawn rate as level increases
-            int enemyCount = baseEnemyCount + currentLevel; // Increase number of enemies with level
+            float spawnRate = (baseSpawnRate + GetRandomExtraTimeBetweenEnemySpawns()) / currentLevel; // Decrease spawn rate as level increases
+            int enemyCount = (baseEnemyCount + /*I DONT HAVE TIME JUST CAST IT*/(int)GetRandomExtraEnemies()) + currentLevel; // Increase number of enemies with level
 
             for (int i = 0; i < enemyCount; i++)
             {
@@ -64,6 +66,15 @@ public class DifficultyManager : MonoBehaviour
 
             yield return new WaitForSeconds(baseWaveSpawnRate);
         }
+    }
+
+    public float GetRandomExtraTimeBetweenEnemySpawns()
+    {
+        return UnityEngine.Random.Range(0, spawnRateVariance);
+    }
+    public float GetRandomExtraEnemies()
+    {
+        return UnityEngine.Random.Range(0, extraEnemyVariance);
     }
 
     public void LevelUp()
