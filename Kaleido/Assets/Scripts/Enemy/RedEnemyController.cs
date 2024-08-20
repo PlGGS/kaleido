@@ -25,7 +25,7 @@ public class RedEnemyController : EnemyController
 
         WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
 
-        float distance = Vector3.Distance(transform.position, wallController.GetRectTopCenterPosition());
+        float distance = Vector3.Distance(transform.position, transform.parent.GetChild(0).position);
         float remainingDistance = distance;
         if (remainingDistance > 0)
         {

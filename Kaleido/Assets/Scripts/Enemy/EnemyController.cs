@@ -82,6 +82,8 @@ public class EnemyController : MonoBehaviour
 
             WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
             wallController.Elongate(remainingDistance);
+            //wallController.currElongationFactor = remainingDistance;
+
 
             // Lerp position over time
             transform.position = Vector3.Lerp(startPosition, targetPosition, 1 - (remainingDistance / distance));
