@@ -248,8 +248,6 @@ public class CenterPointController : MonoBehaviour
         float remainingDistance = distance;
         while (remainingDistance > 0)
         {
-            Debug.Log($"THE movement is locked: {player.GetComponent<PlayerController>().movementLockedByCenterPoint}");
-
             //Check again if the attached script is missing (meaning the wall was destroyed)
             if (wallController == null) yield break;
 
@@ -315,8 +313,6 @@ public class CenterPointController : MonoBehaviour
         float elapsedTime = 0f;
         while (elapsedTime < 1f)
         {
-            Debug.Log($"is the movement locked?: {player.GetComponent<PlayerController>().movementLockedByCenterPoint}");
-
             // Check again if the attached script is missing (meaning the wall was destroyed)
             if (wallController == null) yield break;
 
@@ -333,7 +329,6 @@ public class CenterPointController : MonoBehaviour
             {
                 player.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime);
                 player.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
-
             }
 
             elapsedTime += Time.deltaTime * (1 / moveDuration);

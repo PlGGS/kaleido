@@ -1,34 +1,94 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; // Assuming you use UI Text for displaying level up text
+
+/// <summary>
+/// Manages enemy spawning
+/// </summary>
 public class DifficultyManager : MonoBehaviour
 {
-    public GameManager gameManager;
+    public CenterPointController centerPointController;
 
-    public float enemySpeedMultiplier = 1.1f;
-    public float enemyHealthMultiplier = 1.1f;
+    public GameObject redEnemyPrefab;
+    public GameObject pinkEnemyPrefab;
+    public GameObject cyanEnemyPrefab;
+    public GameObject orangeEnemyPrefab;
+
+    public Text levelUpText; // UI Text for level up display
+    public AudioClip levelUpSound; // Sound effect for level up
+    public AudioSource audioSource; // AudioSource to play the sound
+
+    public int currentLevel = 1;
+
+    public float baseSpawnRate = 1.0f;
+    public float baseWaveSpawnRate = 5.0f;
+    public int baseEnemyCount = 5;
+    public float levelUpDelay = 2.0f;
 
     void Start()
     {
-        UpdateDifficulty();
+        StartCoroutine(SpawnEnemies());
     }
 
-    public void IncreaseLevel()
+    IEnumerator SpawnEnemies()
     {
-        //TODO display text with currentLevel number
-        //TODO play level-up sound effect
+        // Wait until the next frame to ensure walls have been created
+        yield return null;
 
-        gameManager.currentLevel++;
-        UpdateDifficulty();
+        while (true)
+        {
+            float spawnRate = baseSpawnRate / currentLevel; // Decrease spawn rate as level increases
+            int enemyCount = baseEnemyCount + currentLevel; // Increase number of enemies with level
+
+            for (int i = 0; i < enemyCount; i++)
+            {
+                GameObject wall = centerPointController.GetRandomWall();
+
+                if (wall != null)
+                {
+                    WallController wallController = wall.GetComponentInChildren<WallController>();
+                    //TODO only set the wall to being eaten if we spawn a red enemy
+                    wallController.isBeingEaten = true;
+
+                    GameObject enemy = Instantiate(redEnemyPrefab, wallController.GetRectBottomCenterPosition(), Quaternion.identity);
+                    enemy.transform.SetParent(wall.transform, false);
+                    //enemy.transform.position = wallController.GetWallBottomCenterPosition();
+                    EnemyController enemyController = enemy.GetComponent<EnemyController>();
+                    enemyController.centerPoint = this.gameObject;
+                }
+
+                yield return new WaitForSeconds(spawnRate);
+            }
+
+            yield return new WaitForSeconds(baseWaveSpawnRate);
+        }
     }
 
-    private void UpdateDifficulty()
+    public void LevelUp()
     {
-        //float newSpeed = gameManager.UpdateAllEnemySpeeds() * Mathf.Pow(enemySpeedMultiplier, gameManager.currentLevel - 1);
-        //float newHealth = gameManager.UpdateAllEnemyMaxHealth() * Mathf.Pow(enemyHealthMultiplier, gameManager.currentLevel - 1);
+        
+        StopCoroutine(SpawnEnemies());
+        StartCoroutine(LevelUpSequence());
+    }
 
-        // Apply new difficulty settings to enemies
-        // Example: enemyController.SetSpeed(newSpeed);
-        // Example: enemyController.SetHealth(newHealth);
+    IEnumerator LevelUpSequence()
+    {
+        // TODO Display text and play level up sound
+        //levelUpText.text = "Level " + currentLevel;
+        //levelUpText.gameObject.SetActive(true);
+        //audioSource.PlayOneShot(levelUpSound);
+        Debug.Log($"Level {currentLevel} Complete!!");
+
+        // Wait for the defined delay
+        yield return new WaitForSeconds(levelUpDelay);
+
+        // Hide the text and begin next level
+        levelUpText.gameObject.SetActive(false);
+
+        currentLevel++;
+        //TODO set difficulty for next level here when we call SpawnEnemies ????
+        StartCoroutine(SpawnEnemies());
     }
 }
