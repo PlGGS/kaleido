@@ -256,6 +256,7 @@ MonoBehaviour:
   defaultShotChargeDelay: 1
   currShotChargeDelay: 1
   chargeCoolDownMultiplier: 1
+  shotInterval: 0.05
 --- !u!4 &748543493
 Transform:
   m_ObjectHideFlags: 0
@@ -437,12 +438,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   wallPrefab: {fileID: 3537615946435986620, guid: 7c1f0ef18a5e12840a14b55565d7c649,
     type: 3}
+  player: {fileID: 748543491}
   walls: []
   currAmtWalls: 24
   prevAmtWalls: 0
   currRadius: 15
   prevRadius: 0
-  currPatternDefinition: 2
+  currPatternDefinition: 1
   prevPatternDefinition: 0
   vertices: []
 --- !u!114 &1931987057

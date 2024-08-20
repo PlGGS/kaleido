@@ -40,7 +40,7 @@ public class EnemyController : MonoBehaviour
 
     public float bulletScaleAmt = 0.1f; // Scale amount per bullet hit
     public float chargedBulletScaleAmt = 0.2f; // Scale amount per charged bullet hit
-    public float maxScaleAmt = 2f; // Max scale amount before enemy dies
+    public float maxScaleAmt = 5f; // Max scale amount before enemy dies
 
     private Vector3 originalScale;
 
@@ -81,8 +81,6 @@ public class EnemyController : MonoBehaviour
 
     public void OnBulletHit(float bulletCharge)
     {
-        Debug.Log("HOHOHOHOHOHOHO");
-
         float scaleIncrement = bulletCharge > 0 ? bulletCharge * chargedBulletScaleAmt : bulletScaleAmt;
         Vector3 newScale = transform.localScale + new Vector3(scaleIncrement, scaleIncrement, scaleIncrement);
 

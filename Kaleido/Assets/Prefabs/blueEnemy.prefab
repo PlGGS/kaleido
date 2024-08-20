@@ -160,7 +160,7 @@ MonoBehaviour:
   type: 2
   bulletScaleAmt: 0.1
   chargedBulletScaleAmt: 0.2
-  maxScaleAmt: 2
+  maxScaleAmt: 4
 --- !u!54 &6718735508568980939
 Rigidbody:
   m_ObjectHideFlags: 0

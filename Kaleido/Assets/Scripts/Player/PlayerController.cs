@@ -8,10 +8,12 @@ public class PlayerController : MonoBehaviour
     private CenterPointController centerPointController;
     public GameObject standardBulletPrefab;
 
-    private int currentWallIndex;
+    public int currentWallIndex;
 
     public float moveInterval = 0.05f; // Time in seconds to move to the next wall
     private float timeSinceLastMove = 0f;
+
+    public bool movementLockedByCenterPoint = false;
 
     public float defaultShotCharge = 1f; // Scale of the current shot, 1 when walking, higher when charging a shot
     public float shotCharge = 1f; // Scale of the current shot, 1 when walking, higher when charging a shot
@@ -63,15 +65,15 @@ public class PlayerController : MonoBehaviour
         // Wait until the walls are initialized
         yield return new WaitUntil(() => centerPointController.walls.Count > 0);
 
-        // Move to the first wall
-        currentWallIndex = 0;
-        MoveToWall(currentWallIndex);
+        // Move to the random wall
+        MoveToWall(centerPointController.GetRandomWallIndex());
     }
 
     // Update is called once per frame
     void Update()
     {
         //Debug.Log($"Shot charge: {shotCharge}, shot charge delay: {currShotChargeDelay}");
+        Debug.Log($"movement locked: {movementLockedByCenterPoint}");
 
         if (currShotChargeDelay > 0)
             currShotChargeDelay -= Time.deltaTime * chargeCoolDownMultiplier;
@@ -196,37 +198,43 @@ public class PlayerController : MonoBehaviour
 
         void Walk()
         {
-            // Check if enough time has passed since the last move
-            if (timeSinceLastMove >= moveInterval)
+            if (movementLockedByCenterPoint == false)
             {
-                if (isMovingLeft)
+                // Check if enough time has passed since the last move
+                if (timeSinceLastMove >= moveInterval)
                 {
-                    //walking left
-                    MoveToPreviousWall();
-                    timeSinceLastMove = 0;
-                }
-                if (isMovingRight)
-                {
-                    //walking right
-                    MoveToNextWall();
-                    timeSinceLastMove = 0;
+                    if (isMovingLeft)
+                    {
+                        //walking left
+                        MoveToPreviousWall();
+                        timeSinceLastMove = 0;
+                    }
+                    if (isMovingRight)
+                    {
+                        //walking right
+                        MoveToNextWall();
+                        timeSinceLastMove = 0;
+                    }
                 }
             }
         }
 
         void Crawl()
         {
-            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+            if (movementLockedByCenterPoint == false)
             {
-                MoveToPreviousWall();
-                wasCrawling = true;
-            }
+                if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+                {
+                    MoveToPreviousWall();
+                    wasCrawling = true;
+                }
 
-            // Check for right arrow key or 'D' key (optional, to move forward as well)
-            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
-            {
-                MoveToNextWall();
-                wasCrawling = true;
+                // Check for right arrow key or 'D' key (optional, to move forward as well)
+                if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
+                {
+                    MoveToNextWall();
+                    wasCrawling = true;
+                }
             }
         }
     }
@@ -238,6 +246,9 @@ public class PlayerController : MonoBehaviour
             GameObject wall = centerPointController.walls[wallIndex];
             if (wall != null)
             {
+                // Set player current wall index
+                currentWallIndex = wallIndex;
+
                 // Set player position to the center of the wall
                 transform.position = new Vector3(wall.transform.position.x, 0.5f, wall.transform.position.z);
                 transform.rotation = wall.transform.rotation;
@@ -255,12 +266,37 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void MoveToClosestWallByIndex()
+    {
+        List<GameObject> walls = centerPointController.walls;
+
+        if (walls == null || walls.Count == 0) return;
+        if (walls.Count == 1)
+            MoveToWall(0);
+
+        int leftIndex = (currentWallIndex - 1 + walls.Count) % walls.Count;
+        int rightIndex = (currentWallIndex + 1) % walls.Count;
+
+        float distanceToLeft = Vector3.Distance(transform.position, walls[leftIndex].transform.position);
+        float distanceToRight = Vector3.Distance(transform.position, walls[rightIndex].transform.position);
+
+        if (distanceToLeft < distanceToRight)
+        {
+            currentWallIndex = leftIndex;
+            transform.position = walls[leftIndex].transform.position;
+        }
+        else
+        {
+            currentWallIndex = rightIndex;
+            transform.position = walls[rightIndex].transform.position;
+        }
+    }
+
     void MoveToPreviousWall()
     {
         if (centerPointController.walls.Count > 0)
         {
-            currentWallIndex = (currentWallIndex - 1 + centerPointController.walls.Count) % centerPointController.walls.Count;
-            MoveToWall(currentWallIndex);
+            MoveToWall((currentWallIndex - 1 + centerPointController.walls.Count) % centerPointController.walls.Count);
         }
     }
 
@@ -268,8 +304,7 @@ public class PlayerController : MonoBehaviour
     {
         if (centerPointController.walls.Count > 0)
         {
-            currentWallIndex = (currentWallIndex + 1) % centerPointController.walls.Count;
-            MoveToWall(currentWallIndex);
+            MoveToWall((currentWallIndex + 1) % centerPointController.walls.Count);
         }
     }
 }

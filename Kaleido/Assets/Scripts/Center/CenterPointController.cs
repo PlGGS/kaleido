@@ -7,6 +7,8 @@ public class CenterPointController : MonoBehaviour
 {
     public GameObject wallPrefab;
 
+    public GameObject player;
+
     [HideInInspector]
     public List<GameObject> walls;
 
@@ -165,6 +167,8 @@ public class CenterPointController : MonoBehaviour
     /// <returns>New vertex pattern</returns>
     List<Vector3> TranslateWallsToNewPositions/*TODO AtSpeed / OverDuration*/(List<Vector3> vertexPattern, float moveSpeed = defaultWallMoveSpeed, float moveDuration = defaultWallMoveDuration)
     {
+        int playerCurrentWallIndex = player.GetComponent<PlayerController>().currentWallIndex;
+
         int i = 0;
         for (; i < vertexPattern.Count; i++)
         {
@@ -184,7 +188,8 @@ public class CenterPointController : MonoBehaviour
 
             if (currWall != null)
             {
-                Coroutine wallCoroutine = StartCoroutine(TranslateWallOverDuration(currWall, currVertex, nextVertex, moveDuration));
+                //Coroutine wallCoroutine = StartCoroutine(TranslateWallAtSpeed(currWall, currVertex, nextVertex, moveSpeed, i == playerCurrentWallIndex));
+                Coroutine wallCoroutine = StartCoroutine(TranslateWallOverDuration(currWall, currVertex, nextVertex, moveDuration, i == playerCurrentWallIndex));
                 runningCoroutines.Add(wallCoroutine);
             }
         }
@@ -216,7 +221,7 @@ public class CenterPointController : MonoBehaviour
         Destroy(wall);
     }
 
-    private IEnumerator TranslateWallAtSpeed(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed = defaultWallMoveSpeed)
+    private IEnumerator TranslateWallAtSpeed(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveSpeed = defaultWallMoveSpeed, bool isPlayerAtCurrentWall = false)
     {
         // Wait until the next frame to ensure Start has been called
         yield return null;
@@ -236,10 +241,15 @@ public class CenterPointController : MonoBehaviour
         if (wallController.moveSpeed == defaultWallMoveSpeed)
             moveSpeed = wallController.moveSpeed;
 
+        if (isPlayerAtCurrentWall)
+            player.GetComponent<PlayerController>().movementLockedByCenterPoint = true;
+
         float distance = Vector3.Distance(startPosition, targetPosition);
         float remainingDistance = distance;
         while (remainingDistance > 0)
         {
+            Debug.Log($"THE movement is locked: {player.GetComponent<PlayerController>().movementLockedByCenterPoint}");
+
             //Check again if the attached script is missing (meaning the wall was destroyed)
             if (wallController == null) yield break;
 
@@ -251,6 +261,12 @@ public class CenterPointController : MonoBehaviour
 
             // Lerp scale over time
             pivot.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
+
+            if (isPlayerAtCurrentWall)
+            {
+                player.transform.position = Vector3.Lerp(startPosition, targetPosition, 1 - (remainingDistance / distance));
+                player.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, 1 - (remainingDistance / distance));
+            }
 
             remainingDistance -= Time.deltaTime * moveSpeed;
 
@@ -264,9 +280,16 @@ public class CenterPointController : MonoBehaviour
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
         pivot.transform.localScale = targetScale;
+        if (isPlayerAtCurrentWall)
+        {
+            player.transform.position = targetPosition;
+            player.transform.rotation = targetRotation;
+
+            player.GetComponent<PlayerController>().movementLockedByCenterPoint = false;
+        }
     }
 
-    private IEnumerator TranslateWallOverDuration(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveDuration = defaultWallMoveDuration)
+    private IEnumerator TranslateWallOverDuration(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveDuration = defaultWallMoveDuration, bool isPlayerAtCurrentWall = false)
     {
         // Wait until the next frame to ensure Start has been called
         yield return null;
@@ -286,9 +309,14 @@ public class CenterPointController : MonoBehaviour
         //if (wallController.moveSpeed == defaultWallMoveSpeed)
         //    moveSpeed = wallController.moveSpeed;
 
+        if (isPlayerAtCurrentWall)
+            player.GetComponent<PlayerController>().movementLockedByCenterPoint = true;
+
         float elapsedTime = 0f;
         while (elapsedTime < 1f)
         {
+            Debug.Log($"is the movement locked?: {player.GetComponent<PlayerController>().movementLockedByCenterPoint}");
+
             // Check again if the attached script is missing (meaning the wall was destroyed)
             if (wallController == null) yield break;
 
@@ -301,7 +329,15 @@ public class CenterPointController : MonoBehaviour
             // Lerp scale over time
             pivot.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
 
+            if (isPlayerAtCurrentWall)
+            {
+                player.transform.position = Vector3.Lerp(startPosition, targetPosition, elapsedTime);
+                player.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
+
+            }
+
             elapsedTime += Time.deltaTime * (1 / moveDuration);
+
             yield return null;
         }
 
@@ -312,6 +348,13 @@ public class CenterPointController : MonoBehaviour
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
         pivot.transform.localScale = targetScale;
+        if (isPlayerAtCurrentWall)
+        {
+            player.transform.position = targetPosition;
+            player.transform.rotation = targetRotation;
+
+            player.GetComponent<PlayerController>().movementLockedByCenterPoint = false;
+        }
     }
 
     private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject wall, Transform pivot, WallController wallController, Vector3 currVertex, Vector3 nextVertex)

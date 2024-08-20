@@ -72,6 +72,6 @@ public class BulletController : MonoBehaviour
 
     protected virtual void OnTriggerEnter(Collider other)
     {
-        Debug.Log("HEYEYEYEYEYEY");
+        
     }
 }
