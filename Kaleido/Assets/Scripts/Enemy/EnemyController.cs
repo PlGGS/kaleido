@@ -38,6 +38,12 @@ public class EnemyController : MonoBehaviour
         Orange = 4
     }
 
+    public float bulletScaleAmt = 0.1f; // Scale amount per bullet hit
+    public float chargedBulletScaleAmt = 0.2f; // Scale amount per charged bullet hit
+    public float maxScaleAmt = 2f; // Max scale amount before enemy dies
+
+    private Vector3 originalScale;
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
@@ -64,11 +70,36 @@ public class EnemyController : MonoBehaviour
         }
 
         prevWall = currWall;
+        originalScale = transform.localScale;
     }
 
     // Update is called once per frame
     protected virtual void Update()
     {
-        
+
+    }
+
+    public void OnBulletHit(float bulletCharge)
+    {
+        Debug.Log("HOHOHOHOHOHOHO");
+
+        float scaleIncrement = bulletCharge > 0 ? bulletCharge * chargedBulletScaleAmt : bulletScaleAmt;
+        Vector3 newScale = transform.localScale + new Vector3(scaleIncrement, scaleIncrement, scaleIncrement);
+
+        if (newScale.x >= maxScaleAmt * originalScale.x)
+        {
+            Die();
+        }
+        else
+        {
+            transform.localScale = newScale;
+        }
+    }
+
+    private void Die()
+    {
+        // TODO make the enemy explode or something
+
+        Destroy(gameObject);
     }
 }

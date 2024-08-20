@@ -66,7 +66,7 @@ public class GameManager : MonoBehaviour
 
     public void LevelUp()
     {
-        currentLevel++;
+        
         StopCoroutine(SpawnEnemies());
         StartCoroutine(LevelUpSequence());
     }
@@ -77,12 +77,16 @@ public class GameManager : MonoBehaviour
         //levelUpText.text = "Level " + currentLevel;
         //levelUpText.gameObject.SetActive(true);
         //audioSource.PlayOneShot(levelUpSound);
+        Debug.Log($"Level {currentLevel} Complete!!");
 
         // Wait for the defined delay
         yield return new WaitForSeconds(levelUpDelay);
 
-        // Hide the text and restart spawning enemies
+        // Hide the text and begin next level
         levelUpText.gameObject.SetActive(false);
+
+        currentLevel++;
+        //TODO set difficulty for next level here when we call SpawnEnemies ????
         StartCoroutine(SpawnEnemies());
     }
 }

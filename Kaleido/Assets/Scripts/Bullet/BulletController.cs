@@ -69,4 +69,9 @@ public class BulletController : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    protected virtual void OnTriggerEnter(Collider other)
+    {
+        Debug.Log("HEYEYEYEYEYEY");
+    }
 }

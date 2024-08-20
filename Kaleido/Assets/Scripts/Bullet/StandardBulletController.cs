@@ -20,4 +20,25 @@ public class StandardBulletController : BulletController
 
         
     }
+
+    protected override void OnTriggerEnter(Collider other)
+    {
+        base.OnTriggerEnter(other);
+
+        // Check if the other collider is an enemy
+        if (other.CompareTag("Enemy"))
+        {
+            // Get the EnemyController from the collided enemy
+            EnemyController enemyController = other.GetComponentInParent<EnemyController>();
+
+            if (enemyController != null)
+            {
+                // Call OnBulletHit() on the enemy, passing the bulletCharge
+                enemyController.OnBulletHit(bulletCharge);
+
+                // Optionally, destroy the bullet or disable it
+                Destroy(gameObject);
+            }
+        }
+    }
 }
