@@ -246,6 +246,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centerPoint: {fileID: 1931987054}
+  standardBulletPrefab: {fileID: 4886777178343532025, guid: bcef60ebc97d2c844b7ccd31dd581201,
+    type: 3}
   moveInterval: 0.03
 --- !u!4 &748543493
 Transform:

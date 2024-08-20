@@ -150,8 +150,8 @@ public class CenterPointController : MonoBehaviour
 
         // Instantiate the wall prefab
         GameObject wall = Instantiate(wallPrefab, wallPosition, wallRotation);
-        Transform rect = wall.transform.GetChild(0);
-        rect.transform.localScale = new Vector3(rect.transform.localScale.x, rect.transform.localScale.y, wallLength);
+        Transform pivot = wall.transform.GetChild(0);
+        pivot.transform.localScale = new Vector3(pivot.transform.localScale.x, pivot.transform.localScale.y, wallLength);
 
         // Add wall to list of walls
         walls.Add(wall);
@@ -221,16 +221,16 @@ public class CenterPointController : MonoBehaviour
         // Wait until the next frame to ensure Start has been called
         yield return null;
 
-        // Get the rect of the wall
-        Transform rect = currWall.transform.GetChild(0);
+        // Get the pivot of the wall
+        Transform pivot = currWall.transform.GetChild(0);
 
         // Get the WallController script from the wall
-        WallController wallController = rect.GetComponent<WallController>();
+        WallController wallController = pivot.GetComponent<WallController>();
 
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, pivot, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -250,7 +250,7 @@ public class CenterPointController : MonoBehaviour
             currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, 1 - (remainingDistance / distance));
 
             // Lerp scale over time
-            rect.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
+            pivot.transform.localScale = Vector3.Lerp(startScale, targetScale, 1 - (remainingDistance / distance));
 
             remainingDistance -= Time.deltaTime * moveSpeed;
 
@@ -263,7 +263,7 @@ public class CenterPointController : MonoBehaviour
         // Final adjustments to ensure accuracy
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
-        rect.transform.localScale = targetScale;
+        pivot.transform.localScale = targetScale;
     }
 
     private IEnumerator TranslateWallOverDuration(GameObject currWall, Vector3 currVertex, Vector3 nextVertex, float moveDuration = defaultWallMoveDuration)
@@ -271,16 +271,16 @@ public class CenterPointController : MonoBehaviour
         // Wait until the next frame to ensure Start has been called
         yield return null;
 
-        // Get the rect of the wall
-        Transform rect = currWall.transform.GetChild(0);
+        // Get the pivot of the wall
+        Transform pivot = currWall.transform.GetChild(0);
 
         // Get the WallController script from the wall
-        WallController wallController = rect.GetComponent<WallController>();
+        WallController wallController = pivot.GetComponent<WallController>();
 
         //Exit the coroutine if the attached script is missing (meaning the wall was destroyed)
         if (wallController == null) yield break;
 
-        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, rect, wallController, currVertex, nextVertex);
+        var (startPosition, targetPosition, startRotation, targetRotation, startScale, targetScale) = GetWallTransformationData(currWall, pivot, wallController, currVertex, nextVertex);
 
         //Use the wall's moveSpeed if we don't define one ourselves
         //if (wallController.moveSpeed == defaultWallMoveSpeed)
@@ -299,7 +299,7 @@ public class CenterPointController : MonoBehaviour
             currWall.transform.rotation = Quaternion.Slerp(startRotation, targetRotation, elapsedTime);
 
             // Lerp scale over time
-            rect.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
+            pivot.transform.localScale = Vector3.Lerp(startScale, targetScale, elapsedTime);
 
             elapsedTime += Time.deltaTime * (1 / moveDuration);
             yield return null;
@@ -311,10 +311,10 @@ public class CenterPointController : MonoBehaviour
         // Final adjustments to ensure accuracy
         currWall.transform.position = targetPosition;
         currWall.transform.rotation = targetRotation;
-        rect.transform.localScale = targetScale;
+        pivot.transform.localScale = targetScale;
     }
 
-    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject wall, Transform rect, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
+    private (Vector3 startPosition, Vector3 targetPosition, Quaternion startRotation, Quaternion targetRotation, Vector3 startScale, Vector3 targetScale) GetWallTransformationData(GameObject wall, Transform pivot, WallController wallController, Vector3 currVertex, Vector3 nextVertex)
     {
         Vector3 startPosition = wall.transform.position;
 
@@ -324,7 +324,7 @@ public class CenterPointController : MonoBehaviour
         Quaternion startRotation = wall.transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(nextVertex - currVertex);
 
-        Vector3 startScale = rect.transform.localScale;
+        Vector3 startScale = pivot.transform.localScale;
         float newWallLength = Vector3.Distance(currVertex, nextVertex);
         Vector3 targetScale = new Vector3(startScale.x, startScale.y, newWallLength);
 

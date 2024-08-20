@@ -2,22 +2,17 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlueEnemyController : EnemyController
+public class ChargedBulletController : BulletController
 {
     // Start is called before the first frame update
-    protected override void Start()
+    void Start()
     {
-        type = Types.Blue;
-        base.Start();
-
-
+        
     }
 
     // Update is called once per frame
-    protected override void Update()
+    void Update()
     {
-        base.Update();
-
-
+        
     }
 }

@@ -1,13 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
-public class OrangeEnemyController : EnemyController
+public class StandardBulletController : BulletController
 {
-    // Start is called before the first frame update
     protected override void Start()
     {
-        type = Types.Orange;
+        type = Types.Standard;
         base.Start();
 
 
@@ -18,6 +18,6 @@ public class OrangeEnemyController : EnemyController
     {
         base.Update();
 
-
+        
     }
 }

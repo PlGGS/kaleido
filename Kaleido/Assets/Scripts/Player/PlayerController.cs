@@ -6,6 +6,8 @@ public class PlayerController : MonoBehaviour
 {
     public GameObject centerPoint;
     private CenterPointController centerPointController;
+    public GameObject standardBulletPrefab;
+
     private int currentWallIndex;
 
     public float moveInterval = 0.05f; // Time in seconds to move to the next wall
@@ -59,25 +61,41 @@ public class PlayerController : MonoBehaviour
 
             if (isCrawling == false)
             {
-                walk();
+                Walk();
             }
             else
             {
                 if (wasCrawling == false)
                 {
-                    walk();
+                    Walk();
                 }
                 else
                 {
-                    crawl();
+                    Crawl();
                 }
             }
+        }
+
+        // Check for spacebar press to shoot a bullet
+        if (Input.GetKey(KeyCode.Space))
+        {
+            Shoot();
         }
 
         //Debug.Log($"Time since last move: {timeSinceLastMove}");
         timeSinceLastMove += Time.deltaTime;
 
-        void walk()
+        void Shoot()
+        {
+            // Check if enough time has passed since the last move
+            if (timeSinceLastMove >= moveInterval)
+            {
+                GameObject bullet = Instantiate(standardBulletPrefab, transform.position, Quaternion.identity);
+                StandardBulletController bulletController = bullet.GetComponent<StandardBulletController>();
+            }
+        }
+
+        void Walk()
         {
             // Check if enough time has passed since the last move
             if (timeSinceLastMove >= moveInterval)
@@ -105,7 +123,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        void crawl()
+        void Crawl()
         {
             if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
             {

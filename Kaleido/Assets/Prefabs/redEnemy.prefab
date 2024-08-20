@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1583173665500084869}
   - component: {fileID: 2218363288632833320}
   - component: {fileID: 582001157316877293}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: redSpheroid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5032366921135421174}
   - component: {fileID: -4994154360990751489}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: redEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,3 +157,4 @@ MonoBehaviour:
   moveSpeed: 1
   targetPosition: {x: 0, y: 0, z: 0}
   type: 1
+  remainingDistance: 0

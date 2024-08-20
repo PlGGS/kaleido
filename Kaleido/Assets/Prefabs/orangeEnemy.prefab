@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4083165191209090238}
   - component: {fileID: 7872831967965456042}
   - component: {fileID: 1198804560816482499}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: orangeSpheroid
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -115,7 +115,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8250840997712153140}
   - component: {fileID: -530457620519671894}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: orangeEnemy
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -151,5 +151,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   centerPoint: {fileID: 0}
-  moveInterval: 0.05
+  currWall: {fileID: 0}
+  prevWall: {fileID: 0}
+  health: 100
+  moveSpeed: 1
+  targetPosition: {x: 0, y: 0, z: 0}
   type: 4

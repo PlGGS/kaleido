@@ -41,8 +41,6 @@ public class EnemyController : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        prevWall = currWall;
-
         switch (type)
         {
             case Types.Red:
@@ -64,22 +62,13 @@ public class EnemyController : MonoBehaviour
             default:
                 break;
         }
+
+        prevWall = currWall;
     }
 
     // Update is called once per frame
     protected virtual void Update()
     {
         
-    }
-
-    protected CenterPointController GetCenterPointController()
-    {
-        if (centerPoint != null)
-        {
-            return centerPoint.GetComponent<CenterPointController>();
-        }
-
-        Debug.LogError("CenterPoint is not assigned");
-        return null;
     }
 }

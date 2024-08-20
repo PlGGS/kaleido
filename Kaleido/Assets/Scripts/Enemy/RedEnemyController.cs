@@ -11,8 +11,8 @@ public class RedEnemyController : EnemyController
     // Start is called before the first frame update
     protected override void Start()
     {
-        base.Start();
         type = Types.Red;
+        base.Start();
 
 
     }
@@ -21,10 +21,6 @@ public class RedEnemyController : EnemyController
     protected override void Update()
     {
         base.Update();
-
-        //StartCoroutine(TranslateEnemyAtMoveSpeed(GetCurrWall().GetComponent<WallController>().GetWallTopCenterPosition())); //TODO this is shit but for now it's fine
-
-        //Vector3 startPosition = transform.position;
 
         WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
 
@@ -36,7 +32,6 @@ public class RedEnemyController : EnemyController
             wallController.Elongate(remainingDistance);
 
             transform.Translate(Vector3.up * MoveSpeed * Time.deltaTime);
-                //.position = Vector3.MoveTowards(startPosition, targetPosition, 1 - (remainingDistance / distance));
 
             remainingDistance -= Time.deltaTime * MoveSpeed;
         }
@@ -44,7 +39,10 @@ public class RedEnemyController : EnemyController
         {
             // Final adjustments to ensure accuracy
             transform.position = targetPosition;
-            GetCenterPointController().RemoveWall(transform.parent.gameObject); //The enemy should be a child of the wall
+
+            //TODO maybe remove the enemy from the wall first before removing the wall in order to have the enemy blink to be captured
+            //if the player captures the enemy before they fully dissappear, the wall spawns back in
+            centerPoint.GetComponent<CenterPointController>().RemoveWall(transform.parent.gameObject); //The enemy should be a child of the wall
         }
     }
 }

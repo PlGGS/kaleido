@@ -7,8 +7,8 @@ public class CyanEnemyController : EnemyController
     // Start is called before the first frame update
     protected override void Start()
     {
-        base.Start();
         type = Types.Cyan;
+        base.Start();
 
 
     }
