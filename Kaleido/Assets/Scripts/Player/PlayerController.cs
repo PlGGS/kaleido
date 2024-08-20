@@ -11,12 +11,30 @@ public class PlayerController : MonoBehaviour
     private int currentWallIndex;
 
     public float moveInterval = 0.05f; // Time in seconds to move to the next wall
-    private float timeSinceLastMove = 1f;
+    private float timeSinceLastMove = 0f;
 
-    private bool wasCrawling = false; //Was the player crawling on the last update (Allows for delay to feel like you're slowing down)
-    private bool isCrawling = false;
+    public float defaultShotCharge = 1f; // Scale of the current shot, 1 when walking, higher when charging a shot
+    public float shotCharge = 1f; // Scale of the current shot, 1 when walking, higher when charging a shot
+    public float maxShotCharge = 10f;
+    public float shotChargeMultiplier = 1.02f; //Multiplier for how quickly shots charge when holding Shoot while crawling
+    public float defaultShotChargeDelay = 1f; //Delay in seconds after the player shoots a charged shot
+    public float currShotChargeDelay = 1f; //Delay in seconds after the player shoots a charged shot
+    public float chargeCoolDownMultiplier = 1f; //Multiplier for how quickly the player can shoot again after a charged shot
+
+    public float shotInterval = 0.05f; // Time in seconds to move to the next wall
+    private float timeSinceLastShot = 0f;
+
     private bool isMovingLeft = false;
     private bool isMovingRight = false;
+    private bool wasMovingLeft = false;
+    private bool wasMovingRight = false;
+    private bool isWalking = false; //Is walking is just isMovingLeft or isMovingRight
+    private bool wasWalking = false; //Was walking is just wasMovingLeft or wasMovingRight
+    private bool isCrawling = false;
+    private bool wasCrawling = false; //Was the player crawling on the last update (Allows for delay to feel like you're slowing down)
+    
+    private bool isHoldingShoot = false;
+    private bool wasHoldingShoot = false; //Was the player shooting on the last update (Allows for charged shots to be held after crawling)
 
     // Start is called before the first frame update
     void Start()
@@ -53,46 +71,127 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Debug.Log($"Shot charge: {shotCharge}, shot charge delay: {currShotChargeDelay}");
+
+        if (currShotChargeDelay > 0)
+            currShotChargeDelay -= Time.deltaTime * chargeCoolDownMultiplier;
+
+        if (currShotChargeDelay < 0)
+            currShotChargeDelay = 0;
+
         if (centerPointController != null && centerPointController.walls.Count > 1)
         {
-            isCrawling = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightControl);
+            //check if we were walking or crawling on the previous frame
+            if (isMovingLeft)
+            {
+                wasMovingLeft = true;
+                wasWalking = true;
+            }
+            if (isMovingRight)
+            {
+                wasMovingRight = true;
+                wasWalking = true;
+            }
+            if (isCrawling)
+                wasCrawling = true;
+            if (isHoldingShoot)
+                wasHoldingShoot = true;
+
+            //check if we're walking or crawling on the current frame
             isMovingLeft = Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A);
             isMovingRight = Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D);
+            isWalking = (isMovingLeft || isMovingRight);
+            isCrawling = Input.GetKey(KeyCode.LeftShift);
+            isHoldingShoot = Input.GetKey(KeyCode.Space);
 
-            if (isCrawling == false)
+            if (isCrawling)
             {
-                Walk();
+                //crawling
+                if (wasCrawling == false)
+                {
+                    //we were NOT crawling on the last frame, now we are
+
+                    //One final frame of walking when we first press Crouch
+                    //Subject to removal if it ruins the charged shooting mechanic
+                    Walk();
+                }
+
+                if (isHoldingShoot)
+                {
+                    ChargeShot();
+                }
+                else if (wasHoldingShoot)
+                {
+                    if (shotCharge > defaultShotCharge)
+                    {
+                        Shoot();
+                        ResetShotCharge();
+                    }
+                }
+
+                Crawl();
             }
             else
             {
-                if (wasCrawling == false)
+                //not crawling
+                if (isHoldingShoot)
                 {
-                    Walk();
+                    if (timeSinceLastShot >= shotInterval)
+                    {
+                        if (shotCharge > defaultShotCharge || currShotChargeDelay == 0)
+                        {
+                            Shoot();
+                            ResetShotCharge();
+                        }
+                    }
                 }
                 else
                 {
-                    Crawl();
+                    if (shotCharge > defaultShotCharge)
+                    {
+                        ResetShotCharge();
+                    }
                 }
+
+                Walk();
+            }
+
+            wasMovingLeft = false;
+            wasWalking = false;
+            wasMovingRight = false;
+            wasWalking = false;
+            wasCrawling = false;
+            wasHoldingShoot = false;
+        }
+
+        timeSinceLastShot += Time.deltaTime;
+        timeSinceLastMove += Time.deltaTime;
+
+        void ChargeShot()
+        {
+            if (shotCharge < maxShotCharge)
+            {
+                //charge shot
+                shotCharge *= shotChargeMultiplier;
             }
         }
 
-        // Check for spacebar press to shoot a bullet
-        if (Input.GetKey(KeyCode.Space))
+        void ResetShotCharge()
         {
-            Shoot();
+            shotCharge = defaultShotCharge;
         }
-
-        //Debug.Log($"Time since last move: {timeSinceLastMove}");
-        timeSinceLastMove += Time.deltaTime;
 
         void Shoot()
         {
-            // Check if enough time has passed since the last move
-            if (timeSinceLastMove >= moveInterval)
-            {
-                GameObject bullet = Instantiate(standardBulletPrefab, transform.position, Quaternion.identity);
-                StandardBulletController bulletController = bullet.GetComponent<StandardBulletController>();
-            }
+            GameObject bullet = Instantiate(standardBulletPrefab, transform.position, Quaternion.identity);
+            StandardBulletController bulletController = bullet.GetComponent<StandardBulletController>();
+            bulletController.bulletCharge = shotCharge;
+
+            //Apply the delay after shooting a charged shot
+            if (shotCharge > defaultShotCharge)
+                currShotChargeDelay = defaultShotChargeDelay;
+
+            timeSinceLastShot = 0;
         }
 
         void Walk()
@@ -102,23 +201,15 @@ public class PlayerController : MonoBehaviour
             {
                 if (isMovingLeft)
                 {
+                    //walking left
                     MoveToPreviousWall();
                     timeSinceLastMove = 0;
-
-                    if (isCrawling)
-                        wasCrawling = true;
-                    else
-                        wasCrawling = false;
                 }
                 if (isMovingRight)
                 {
+                    //walking right
                     MoveToNextWall();
                     timeSinceLastMove = 0;
-
-                    if (isCrawling)
-                        wasCrawling = true;
-                    else
-                        wasCrawling = false;
                 }
             }
         }

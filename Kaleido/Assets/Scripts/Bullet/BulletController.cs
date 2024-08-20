@@ -24,6 +24,8 @@ public class BulletController : MonoBehaviour
         set { moveSpeed = Mathf.Clamp(value, 1f, 1000f); }
     }
 
+    public float bulletCharge;
+
     public Types type;
     public enum Types
     {
