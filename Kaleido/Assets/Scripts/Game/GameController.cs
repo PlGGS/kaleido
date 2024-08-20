@@ -51,6 +51,7 @@ public class GameController : MonoBehaviour
                 mainMenuBestTimeTMP.text = $"Best Time: {TimeConverter.ConvertSecondsToTime(bestTime)}";
                 break;
             case "Level1":
+                currTime = 0f;
                 break;
             case "GameOver":
                 isGameOver = true;
