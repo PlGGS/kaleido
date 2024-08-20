@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -6,8 +7,13 @@ using UnityEngine.SceneManagement;
 public class GameController : MonoBehaviour
 {
     public List<SceneAsset> scenes = new List<SceneAsset>();
-    
     public string currSceneName;
+
+    public TextMeshProUGUI bestTimeTMP;
+    public float bestTime = 0;
+    public float currTime = 0;
+
+    public bool isGameOver = false;
 
     void Awake()
     {
@@ -32,6 +38,21 @@ public class GameController : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.Return))
                 {
                     LoadScene("Level1");
+                }
+
+                bestTimeTMP.text = $"Best Time: {TimeConverter.ConvertSecondsToTime(bestTime)}";
+                break;
+            case "Level1":
+                if (isGameOver == false)
+                {
+                    currTime += Time.deltaTime;
+                }
+                else
+                {
+                    if (currTime > bestTime)
+                        bestTime = currTime;
+
+
                 }
                 break;
             default:
