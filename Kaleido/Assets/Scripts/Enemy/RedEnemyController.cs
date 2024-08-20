@@ -22,27 +22,6 @@ public class RedEnemyController : EnemyController
     {
         base.Update();
 
-        WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
-
-        float distance = Vector3.Distance(transform.position, transform.parent.GetChild(0).position);
-        float remainingDistance = distance;
-        //If the enemy is below the 
-        if (remainingDistance > 0 && transform.position.y < 0)
-        {
-            wallController.Elongate(remainingDistance);
-
-            transform.Translate(Vector3.up * MoveSpeed * Time.deltaTime);
-
-            remainingDistance -= Time.deltaTime * MoveSpeed;
-        }
-        else
-        {
-            // Final adjustments to ensure accuracy
-            transform.position = targetPosition;
-
-            //TODO maybe remove the enemy from the wall first before removing the wall in order to have the enemy blink to be captured
-            //if the player captures the enemy before they fully dissappear, the wall spawns back in
-            centerPoint.GetComponent<CenterPointController>().RemoveWall(transform.parent.gameObject); //The enemy should be a child of the wall
-        }
+        
     }
 }

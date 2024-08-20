@@ -8,8 +8,13 @@ public class GameController : MonoBehaviour
 {
     public List<SceneAsset> scenes = new List<SceneAsset>();
     public string currSceneName;
-
+    
     private TextMeshProUGUI mainMenuBestTimeTMP;
+    private TextMeshProUGUI currTimeTMP;
+
+    private GameObject player;
+    private TextMeshProUGUI shotChargeTMP;
+    
     private TextMeshProUGUI gameOverBestTimeTMP;
     private TextMeshProUGUI gameOverYourTimeTMP;
     public float bestTime = 0;
@@ -52,6 +57,9 @@ public class GameController : MonoBehaviour
                 break;
             case "Level1":
                 currTime = 0f;
+                player = GameObject.Find("player");
+                shotChargeTMP = GameObject.Find("Shot Charge").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+                currTimeTMP = GameObject.Find("Current Time").transform.GetChild(0).GetComponent<TextMeshProUGUI>();
                 break;
             case "GameOver":
                 isGameOver = true;
@@ -77,9 +85,17 @@ public class GameController : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.Return))
                     LoadScene("Level1");
                 else if (Input.GetKeyDown(KeyCode.Escape))
+                {
+#if UNITY_EDITOR
+                    UnityEditor.EditorApplication.isPlaying = false;
+#else
                     Application.Quit();
+#endif
+                }
                 break;
             case "Level1":
+                shotChargeTMP.text = $"Shot Charge: {(int)player.GetComponent<PlayerController>().shotCharge}";
+                currTimeTMP.text = TimeConverter.ConvertSecondsToTime(currTime);
                 currTime += Time.deltaTime;
                 break;
             case "GameOver":

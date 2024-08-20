@@ -5,6 +5,7 @@ using UnityEngine;
 public class EnemyController : MonoBehaviour
 {
     public GameObject centerPoint;
+    public DifficultyManager difficultyManager;
 
     public GameObject currWall;
     public GameObject prevWall;
@@ -47,27 +48,35 @@ public class EnemyController : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        DifficultyManager difficultyManager = centerPoint.GetComponent<DifficultyManager>();
+
         switch (type)
         {
             case Types.Red:
-                health = 50;
-                moveSpeed = 50;
+                Health = 25;
+                MoveSpeed = 3f;
                 break;
             case Types.Blue:
-                health = 50;
-                moveSpeed = 6;
+                Health = 10;
+                MoveSpeed = 6f;
                 break;
             case Types.Cyan:
-                health = 75;
-                moveSpeed = 4;
+                Health = 40;
+                MoveSpeed = 4f;
                 break;
             case Types.Orange:
-                health = 100;
-                moveSpeed = 3;
+                Health = 50;
+                MoveSpeed = 3f;
                 break;
             default:
                 break;
         }
+
+        float healthMultiplier = 1 + ((difficultyManager.currentLevel * 0.1f) * 2.5f); // Increase health by 10% per level
+        float speedMultiplier = 1 + ((difficultyManager.currentLevel * 0.1f) * 2.5f); // Increase speed by 5% per level
+
+        health = Mathf.RoundToInt(Health * healthMultiplier);
+        moveSpeed = MoveSpeed * speedMultiplier;
 
         prevWall = currWall;
         originalScale = transform.localScale;
@@ -76,7 +85,28 @@ public class EnemyController : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        WallController wallController = transform.parent.gameObject.GetComponentInChildren<WallController>();
 
+        float distance = Vector3.Distance(transform.position, transform.parent.GetChild(0).position);
+        float remainingDistance = distance;
+        //If the enemy is below the 
+        if (remainingDistance > 0 && transform.position.y < 0)
+        {
+            wallController.Elongate(remainingDistance);
+
+            transform.Translate(Vector3.up * MoveSpeed * Time.deltaTime);
+
+            remainingDistance -= Time.deltaTime * MoveSpeed;
+        }
+        else
+        {
+            // Final adjustments to ensure accuracy
+            transform.position = targetPosition;
+
+            //TODO maybe remove the enemy from the wall first before removing the wall in order to have the enemy blink to be captured
+            //if the player captures the enemy before they fully dissappear, the wall spawns back in
+            centerPoint.GetComponent<CenterPointController>().RemoveWall(transform.parent.gameObject); //The enemy should be a child of the wall
+        }
     }
 
     public void OnBulletHit(float bulletCharge)
